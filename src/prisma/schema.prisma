@@ -1,0 +1,254 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Campus {
+  id         Int     @id @unique
+  campusYear String @unique
+  drive      Drive[]
+
+  @@map("campus_details")
+}
+
+model Drive {
+  campusId                Int
+  driveId                 Int                       @id @default(autoincrement())
+  driveDate               DateTime
+  // answerAnswerId          Int?
+  driveStatus             String
+  Answer                  Answers[]
+  CandidateDetailsCollege CandidateDetailsCollege[]
+  CandidateTracking       CandidateTracking[]
+  feedBack                feedBack[]
+  college                 college?
+  campus                  Campus                    @relation(fields: [campusId], references: [id])
+  RecruitmentTeam         RecruitmentTeam[]
+  Rounds                  Rounds[]
+  RoundPrivileges         RoundPrivileges[]
+  questionSet             questionSet[]
+  candidateQuestionSet    candidateQuestionSet[]
+  Results                 Results[]
+  submitTest              submitTest[]
+  jobRoles                jobRoles[]
+  @@map("drive_details")
+}
+
+model college {
+  driveId   Int    @unique
+  college   String @db.VarChar(70)
+  collegeId Int    @id @default(autoincrement())
+  drive     Drive  @relation(fields: [driveId], references: [driveId])
+
+  @@map("college_details")
+}
+
+model CandidateTracking {
+  driveId               Int
+  studentId             Int
+  round                 Int
+  startTime             String
+  loginAttempts         Int?                    @default(0)
+  roundOneDurationTaken String?                 @default("0")
+  drive                 Drive                   @relation(fields: [driveId], references: [driveId])
+  student               CandidateDetailsCollege @relation(fields: [studentId], references: [studentId])
+
+  @@id([driveId, studentId,round])
+  @@map("candidate_tracking")
+}
+
+model Mcqs {
+  id                   Int                    @id @default(autoincrement())
+  question             String?                @default("text") @db.VarChar(1024)
+  difficultLevel       String?                @db.VarChar(20)
+  optionType           String?                @default("text") @db.VarChar(50)
+  option1              String                 @db.VarChar(1024)
+  option2              String                 @db.VarChar(1024)
+  option3              String                 @db.VarChar(1024)
+  option4              String                 @db.VarChar(1024)
+  answer               String                 @db.VarChar(60)
+  topic                String?                @db.VarChar(200)
+  imageLink            String?                @db.VarChar(1024)
+  snippet              String?                @db.VarChar(1024)
+  Answer               Answers[]
+  questionSet          questionSet[]
+  candidateQuestionSet candidateQuestionSet[]
+}
+
+model Answers {
+  answerId    Int     @id @unique @default(autoincrement())
+  driveId     Int
+  roundId     Int
+  questionId  Int
+  candidateId Int
+  answer      String?
+  drive       Drive   @relation(fields: [driveId], references: [driveId])
+  question    Mcqs    @relation(fields: [questionId], references: [id])
+}
+
+model RecruitmentTeamMembers {
+  id     Int    @id @default(autoincrement())
+  name String
+  email String
+  position String
+  @@map("recruitment_team_members")
+}
+
+model RoundPrivileges {
+  id Int @id @unique  @default(autoincrement())
+  driveId Int 
+  IsSkipped        Boolean?
+  round            Int?
+  // IsPrev           Boolean?
+  // IsNext            
+  // SubmitOnAnswered Boolean?
+  drive            Drive    @relation(fields: [driveId], references: [driveId])
+
+  @@map("round_privileges")
+}
+
+model CandidateDetailsCollege {
+  studentId            Int                    @unique @default(autoincrement())
+  registerNumber       String
+  name                 String
+  college              String
+  degree               String
+  branch               String
+  dateOfBirth          String
+  gender               String
+  tenthPercentage      Int
+  tenthYOP             Int
+  twelthPercentage     Int?
+  twelthYOP            Int?
+  diplomaPercentage    Int?
+  diplomaYOP           Int?
+  UG_CGPA              Int?
+  UG_YOP               Int?
+  PG_CGPA              Int?
+  PG_YOP               Int?
+  arrearStatus         String?
+  arrearCount          Int?
+  mobileNumber         String?
+  email                String?
+  address              String?
+  driveId              Int
+  drive                Drive                  @relation(fields: [driveId], references: [driveId])
+  CandidateTracking    CandidateTracking[]
+  candidateQuestionSet candidateQuestionSet[]
+  Results       Results[]
+  submitTest   submitTest[]
+
+  @@id([driveId, studentId])
+  @@map("candidate_details_college")
+}
+
+model candidateQuestionSet {
+  // id         String
+  id         Int
+  driveId    Int
+  studentId  Int
+  questionId Int
+  round       Int
+  drive      Drive                   @relation(fields: [driveId], references: [driveId])
+  question   Mcqs                    @relation(fields: [questionId], references: [id])
+  student    CandidateDetailsCollege @relation(fields: [studentId], references: [studentId])
+
+  @@id([driveId, studentId, questionId, id, round])
+}
+
+model questionSet {
+  driveId    Int
+  questionId Int
+  round       Int
+  drive      Drive   @relation(fields: [driveId], references: [driveId])
+  question   Mcqs    @relation(fields: [questionId], references: [id])
+
+  @@id([driveId, questionId,round])
+}
+
+model Instructions {
+  instruction   String?
+  instructionId Int     @id @default(autoincrement())
+
+  @@map("instructions")
+}
+
+model submitTest {
+  driveId              Int    
+  candidateId          Int
+  round                Int
+  submitted            Boolean @default(false)
+  student              CandidateDetailsCollege @relation(fields: [candidateId], references: [studentId])
+  drive                Drive   @relation(fields: [driveId], references: [driveId])
+  @@id([driveId,candidateId,round])
+
+}
+
+model Rounds {
+  driveId              Int     
+  round               Int
+  roundName           String?
+  roundDuration       Int
+  roundTotalQuestions Int
+  roundDifficulty     String?
+  roundTopics         String?
+  roundTestConfig     String?
+  roundStatus         String?
+  drive                Drive   @relation(fields: [driveId], references: [driveId])
+  results               Results[]
+
+  @@id ([driveId,round])
+  @@map("round_details")
+  @@index([round, driveId])
+}
+
+model Results {
+  driveId              Int     
+  candidateId          Int
+  round                Int
+  score                Int      @default(0)
+  drive                Drive   @relation(fields: [driveId], references: [driveId])
+  student    CandidateDetailsCollege @relation(fields: [candidateId], references: [studentId])
+  rounds                Rounds @relation(fields: [round,driveId],references: [round,driveId])
+
+  @@id([driveId,candidateId,round])
+}
+
+model adminCredentials {
+  id                  Int @id @default(autoincrement())
+  email               String
+
+  @@map("admin_details")
+}
+
+model feedBack {
+  driveId              Int     @id
+  labFacilityRating    Int
+  hospitalityRating    Int
+  internetBandwidthRating    Int
+  studentAbility    Int
+  overallFeedBack             String?
+  drive                Drive   @relation(fields: [driveId], references: [driveId])
+  @@map("feedback")
+}
+
+model jobRoles{
+  id Int @id @unique  @default(autoincrement())
+  driveId Int 
+  jobRole String
+  drive                Drive   @relation(fields: [driveId], references: [driveId])
+  @@map("job_roles")
+}
+
+model RecruitmentTeam {
+  id Int @id @unique  @default(autoincrement())
+  driveId Int 
+  teamMembers String
+  position String
+  drive       Drive  @relation(fields: [driveId], references: [driveId])
+  @@map("recruitment_team")
+}

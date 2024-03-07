@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Campus Drive Form</title>
+</head>
+<body>
+  <h1>Campus Drive Form</h1>
+
+  <form action="/submit" method="post" enctype="multipart/form-data">
+    <label for="campusYear">Campus Year:</label>
+    <input type="text" id="campusYear" name="campusYear" required>
+
+    <button type="button" id="newDriveButton">New Drive</button>
+
+    <label for="collegeName">College Name:</label>
+    <input type="text" id="collegeName" name="collegeName" required>
+
+    <label for="totalRounds">Total Rounds:</label>
+    <select id="totalRounds" name="totalRounds" required>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+
+    <label for="duration">Duration per Round:</label>
+    <input type="text" id="duration" name="duration" required>
+
+    <label for="roundPrivileges">Round Privileges:</label>
+    <input type="radio" id="isPrev" name="roundPrivileges" value="isPrev" required>
+    <label for="isPrev">Previous Round</label>
+    <input type="radio" id="isNext" name="roundPrivileges" value="isNext" required>
+    <label for="isNext">Next Round</label>
+    <input type="radio" id="submitAll" name="roundPrivileges" value="submitAll" required>
+    <label for="submitAll">Submit on All Questions Answered</label>
+    <input type="radio" id="skipQuestions" name="roundPrivileges" value="skipQuestions" required>
+    <label for="skipQuestions">Skip Questions</label>
+
+    <label for="studentDatabase">Student Database (Excel):</label>
+    <input type="file" id="studentDatabase" name="studentDatabase" accept=".xlsx, .xls" required>
+
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
