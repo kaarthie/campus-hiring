@@ -78,20 +78,18 @@ export async function createNewDrive(
   collegeName,
   recruitmentTeam,
   job,
-  studentData,
   duration,
-  difficulty,
   roundName,
   skip,
   totalQuestions,
-  topics
+  questionData
 ) {
   try {
     const result = await prisma.$transaction([
       prisma.drive.create({
         data: {
           campusId: Number(campusId),
-          driveDate: new Date(),
+          driveDate: ConvertedDriveDate,
           driveStatus: "upcoming", //
           college: {
             create: {
@@ -122,8 +120,7 @@ export async function createNewDrive(
               roundDuration: Number(duration),
               roundTotalQuestions: Number(totalQuestions),
               roundStatus: "notStarted",
-              roundDifficulty: difficulty,
-              roundTopics: topics,
+              roundTestConfig : questionData
             },
           },
         },
@@ -135,7 +132,7 @@ export async function createNewDrive(
         id: { in: recruitmentTeam },
       },
     });
-    console.log("Resultsss" + JSON.stringify(result));
+    console.log("Results  --->>>  ", JSON.stringify(result));
     for (let members of recruitmentMembers) {
       await prisma.recruitmentTeam.create({
         data: {
@@ -145,10 +142,10 @@ export async function createNewDrive(
         },
       });
     }
-    console.log(JSON.stringify(recruitmentMembers) + "from prisma");
+    console.log("Recruitment Members  --->>>  ", JSON.stringify(recruitmentMembers));
     return { result };
   } catch (error) {
-    console.log(error);
+    console.log("Error in Drive Dao ",error.message);
   }
 }
 

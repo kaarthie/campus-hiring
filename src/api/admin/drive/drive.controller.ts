@@ -86,116 +86,84 @@ export async function removeFeedBack(
 }
 
 export async function addDrive(request: any, reply: FastifyReply) {
-  // const data =await request.file();
-  const data = {};
+  try {
+    const data = {};
 
-  // Iterate over each field in the form-data
-  for await (const part of request.parts()) {
-    if (part.file) {
-      const fileData = await collectStream(part.file);
-
-        // Process the Excel file without saving it
+    // Iterate over each field in the form-data
+    for await (const part of request.parts()) {
+      if (part.file) {
+        const fileData = await collectStream(part.file);
+        // Process the Excel file without saving
         const excelData = await uploadCandidate(fileData);
         console.log(excelData);
 
-    } else {
-      // If the part is a field, store its value
-      data[part.fieldname] = part.value;
+      } else {
+        // If the part is a field, store its value
+        data[part.fieldname] = part.value;
+      }
     }
-  }
-  // Now you have all your form-data fields and files in the 'data' object
-  const {
-    hiringYear,
-    totalQuestions,
-    driveDate,
-    collegeName,
-    recruitmentTeam,
-    jobRoles,
-    noOfRounds,
-    studentData,
-    duration,
-    difficultyLevel,
-    roundName,
-    skip,
-    questionTopics,
-    questionData
-  } : any = data;
-  const roundData = {
-    ds: {
-      easy: 5,
-      medium: 4,
-      hard: 2,
-    },
-    logical: {
-      easy: 4,
-      medium: 5,
-      hard: 2,
-    },
-    sql: {
-      easy: 5,
-      medium: 1,
-      hard: 1,
-    },
-  };
-  const total = Object.values(roundData).reduce((acc, level) => {
-    return acc + Object.values(level).reduce((acc, cnt) => acc + cnt, 0);
-  }, 0);
-  const roundTotalQuestions = 30;
-  const diff = total - roundTotalQuestions;
-  if (diff !== 0) {
-    console.error(`Overall number of questions does not match roundTotalQuestions. Please ${diff > 0 ? "reduce" : "add"} ${Math.abs(diff)} questions.`);
-  } else {
-    console.log("OK fine");
-  }
-  let difficulty = difficultyLevel;
-  if (Array.isArray(difficulty)) {
-    difficulty = difficulty.join(",");
-  }
-  let topics = questionTopics;
-  if (Array.isArray(topics)) {
-    topics = topics.join(",");
-  }
-  console.log("Topics " + typeof topics + " difficulty " + typeof difficulty);
-  const ConvertedDriveDate = new Date(`${driveDate}`);
-  let team : number | number[] = recruitmentTeam.split(',').map(Number);
-  let job: string | string[] = jobRoles.split(',');
-  
-  console.log(
-    "From Create Drive Route",
-    hiringYear,
-    ConvertedDriveDate,
-    collegeName,
-    team,
-    job,
-    studentData,
-    duration,
-    difficulty,
-    roundName,
-    skip,
-    totalQuestions,
-    topics
-  );
 
-  const response = await createNewDrive(
-    hiringYear[0],
-    ConvertedDriveDate,
-    collegeName,
-    team,
-    job,
-    studentData,
-    duration,
-    difficulty,
-    roundName,
-    skip,
-    totalQuestions,
-    topics
-  );
-  if (response) {
+    const {
+      hiringYear,
+      totalQuestions,
+      driveDate,
+      collegeName,
+      recruitmentTeam,
+      jobRoles,
+      duration,
+      roundName,
+      skip,
+      questionData
+    }: any = data;
+
+    const roundData: any = JSON.parse(questionData)
+
+    const total: any = Object.values(roundData).reduce((acc: any, level: any) => {
+      return acc + Object.values(level).reduce((acc: any, cnt) => acc + cnt, 0);
+    }, 0);
+    console.log(total, totalQuestions);
+    const diff = total - totalQuestions;
+    if (diff !== 0) {
+      throw new Error(`Selected number of questions does not match Total No Questions. Please ${diff > 0 ? "reduce" : "add"} ${Math.abs(diff)} questions.`);
+    }
+    console.log(driveDate);
+    const ConvertedDriveDate = new Date(`${driveDate}`);
+    console.log(ConvertedDriveDate);
+    let team: number | number[] = recruitmentTeam.split(',').map(Number);
+    let job: string | string[] = jobRoles.split(',');
+
+    // console.log(
+    //   "From Create Drive Route",
+    //   hiringYear,
+    //   ConvertedDriveDate,
+    //   collegeName,
+    //   team,
+    //   job,
+    //   duration,
+    //   roundName,
+    //   skip,
+    //   totalQuestions,
+    //   questionData
+    // );
+
+    const response = await createNewDrive(
+      hiringYear[0],
+      ConvertedDriveDate,
+      collegeName,
+      team,
+      job,
+      duration,
+      roundName,
+      skip,
+      totalQuestions,
+      questionData
+    );
     reply.code(200).send({ status: true, message: "Drive Created" });
-  } else {
+  } catch (error) { 
+    console.log("Error in drive creation");
     reply
-      .code(400) // bad request code change
-      .send({ status: false, message: "Error in creating a Drive" });
+      .code(500) 
+      .send({ status: false, message: error.message });
   }
 }
 
@@ -236,7 +204,6 @@ export async function startDrive(request: FastifyRequest, reply: FastifyReply) {
   let res = await updateDriveStatus(driveId);
   const status = "started";
   const questionGeneration = await generateQuestion();
-  // console.log(questionGeneration)
   let roundStatus = await updateRoundStatus(driveId, round, status);
   // console.log(roundStatus)
   if (response || res) {
