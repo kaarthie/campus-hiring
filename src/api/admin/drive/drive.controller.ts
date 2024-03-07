@@ -21,7 +21,7 @@ import {
   newDrive,
   startRound,
 } from "./drive.interface";
-import { generateQuestion } from "../questionGeneration/questionSet.dao";
+import { generateQuestion, getQuestionDetails } from "../questionGeneration/questionSet.dao";
 import redis from "../../../config/redis";
 import { resultDao } from "../candidateResults/result.dao";
 import { uploadCandidate } from "../../../services/candidateGeneration";
@@ -88,7 +88,7 @@ export async function removeFeedBack(
 export async function addDrive(request: any, reply: FastifyReply) {
   try {
     const data = {};
-
+    console.log(await getQuestionDetails());
     // Iterate over each field in the form-data
     for await (const part of request.parts()) {
       if (part.file) {

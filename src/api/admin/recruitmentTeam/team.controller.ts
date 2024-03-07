@@ -6,14 +6,16 @@ import {
   deleteMember,
   updateTeamMember,
 } from "./team.dao";
+import { getQuestionDetails } from "../questionGeneration/questionSet.dao";
 
 export async function getRecruitmentTeamMembers(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   const members = await getMembers();
+  const questionDetails = await getQuestionDetails()
   if (members) {
-    reply.code(200).send({ status: true, members: members });
+    reply.code(200).send({ status: true, members: members , questionDetails : questionDetails});
   } else {
     reply
       .code(403)

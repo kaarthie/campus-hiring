@@ -114,7 +114,7 @@ export async function generateQuestion() {
       let questions: any = [];
       if (roundDetails.roundTestConfig) {
         const round = roundDetails.round;
-        const questionData = JSON.parse(roundDetails.roundTestConfig);        
+        const questionData = JSON.parse(roundDetails.roundTestConfig);
         for (const topic in questionData) {
           const diffLevel = questionData[topic];
           for (const level in diffLevel) {
@@ -129,7 +129,7 @@ export async function generateQuestion() {
         for (const question of questions) {
           await redis.set(`question:${question.id}`, JSON.stringify(question));
         }
-        if(questions){
+        if (questions) {
           const questionSetData = questions.map((question: any) => ({
             driveId: drive.driveId,
             round: round,
@@ -148,6 +148,46 @@ export async function generateQuestion() {
     console.log(error);
   }
 }
+
+export async function getQuestionDetails() {
+  try {
+    const mcqData = await prisma.mcqs.findMany();
+
+    const result = mcqData.reduce((acc, curr) => {
+      const { difficultLevel, topic } = curr;
+      
+      if (difficultLevel && topic) {
+        if (!acc[topic]) {
+          acc[topic] = {
+            easy: 0,
+            medium: 0,
+            hard: 0
+          };
+        }
+        
+        acc[topic][difficultLevel]++;
+      }
+      
+      return acc;
+    }, {});
+
+    // Add missing topics with all counts set to zero
+    // const topics = ['sql', 'ds', 'logical'];
+    // topics.forEach(topic => {
+    //   if (!result[topic]) {
+    //     result[topic] = { easy: 0, medium: 0, hard: 0 };
+    //   }
+    // });
+    console.log(result);
+    return result;
+  } catch (error) {
+    // Handle error
+    console.error("Error fetching question details:", error);
+    throw error;
+  }
+}
+
+
 
 export async function getAdminQuestionSet() {
   try {
