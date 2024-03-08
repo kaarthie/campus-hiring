@@ -127,6 +127,7 @@ export async function generateQuestion() {
           }
         }
         for (const question of questions) {
+          console.log(question);
           await redis.set(`question:${question.id}`, JSON.stringify(question));
         }
         if (questions) {

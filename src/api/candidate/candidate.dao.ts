@@ -68,7 +68,7 @@ export async function storeAnswerDao(questionId, studentId, userAnswer, round) {
           questionId: questionId,
           candidateId: studentId,
           answer: userAnswer,
-          roundId: round,
+          roundId: +round,
         },
       });
       return true;

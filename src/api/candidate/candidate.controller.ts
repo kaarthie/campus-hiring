@@ -109,10 +109,10 @@ export async function getQuestion(
   reply: FastifyReply
 ) {
   console.log("Question ID", request.body);
-  const { questionId } = request.body as { id: number };
+  const { questionid  } : any = request.body as { id: number };
   // const mcq = (await redis).get(`${questionId.questionId}`);
-  console.log("Question--------", questionId.questionid);
-  const mcq = await getMcq(questionId.questionid);
+  console.log("Question--------", questionid);
+  const mcq = await getMcq(questionid);
   if (mcq) {
     console.log(mcq);
     // const shuffledQuestion = await shuffleQuestionOptions(mcq);
