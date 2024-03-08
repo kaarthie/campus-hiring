@@ -52,7 +52,7 @@ export async function verifyCandidate(
       });
     }
   } catch (error) {
-    console.log("Error occurred in verify controller:", error);
+    console.log("Error in verifyCandidate: ", error);
     reply.code(500).send({
       status: false,
       message: error.message,

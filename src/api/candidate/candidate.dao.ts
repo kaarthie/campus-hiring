@@ -17,17 +17,22 @@ export async function getCollegeDao() {
 
     return result?.college || false;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
 export async function campusYear(id: number) {
-  const res = await prisma.campus.findFirst({
-    where: {
-      id: id,
-    },
-  });
-  return res;
+  try {
+    const res = await prisma.campus.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    return res;
+  } catch (error) {
+    throw error
+  }
+
 }
 
 export async function storeAnswerDao(questionId, studentId, userAnswer, round) {
@@ -74,7 +79,7 @@ export async function storeAnswerDao(questionId, studentId, userAnswer, round) {
       return true;
     }
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -105,7 +110,7 @@ export async function loginAttempts(studentId) {
       };
     else return { attempts: 0, round: round };
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -149,7 +154,7 @@ export async function driveInstructions() {
     // }
     return generalInstructions;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -201,36 +206,40 @@ export async function lastAnsweredQuestion(studentId) {
       return { questionid: questionId?.questionId, id: 1 };
     }
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
 export async function getMcq(questionId) {
-  let questionFormat = `question:${questionId}`;
-  let questionString: any = await redis.get(questionFormat);
-  const questionObj = JSON.parse(questionString);
-  // let questionObj = await prisma.mcqs.findFirst({
-  //   where: {
-  //     id: questionId
-  //   }
-  // });
+  try {
+    let questionFormat = `question:${questionId}`;
+    let questionString: any = await redis.get(questionFormat);
+    const questionObj = JSON.parse(questionString);
+    // let questionObj = await prisma.mcqs.findFirst({
+    //   where: {
+    //     id: questionId
+    //   }
+    // });
 
-  if (questionObj) {
-    let optionShuffledQuestion = await shuffleQuestionOptions(questionObj);
-    console.log(optionShuffledQuestion + "   Shuffled");
-    return {
-      id: questionObj.id,
-      question: questionObj.question,
-      optionType: questionObj.optionType,
-      topic: questionObj.topic,
-      imageLink: questionObj.imageLink,
-      snippet: questionObj.snippet,
-      options: optionShuffledQuestion,
-    };
-    console.log(optionShuffledQuestion);
-    // return optionShuffledQuestion;
-  } else {
-    return false;
+    if (questionObj) {
+      let optionShuffledQuestion = await shuffleQuestionOptions(questionObj);
+      console.log(optionShuffledQuestion + "   Shuffled");
+      return {
+        id: questionObj.id,
+        question: questionObj.question,
+        optionType: questionObj.optionType,
+        topic: questionObj.topic,
+        imageLink: questionObj.imageLink,
+        snippet: questionObj.snippet,
+        options: optionShuffledQuestion,
+      };
+      console.log(optionShuffledQuestion);
+      // return optionShuffledQuestion;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    throw error
   }
 }
 
@@ -376,45 +385,49 @@ export async function getcandidateQuestionSet(studentId) {
     }
     return false;
   } catch (error) {
-    console.log(error.message);
+    throw error
   }
 }
 
 export async function storeCandidateTime(studentId) {
-  const timeTaken: any = await redis.get(`${studentId}`);
-  console.log("timeTaken from redis :", timeTaken);
-  const existingCandidate = await prisma.drive.findFirst({
-    where: {
-      driveStatus: "pending",
-    },
-    include: {
-      CandidateTracking: {
-        where: {
-          studentId: studentId,
-        },
-      },
-    },
-  });
-
-  if (existingCandidate?.CandidateTracking.length) {
-    const driveId = existingCandidate?.driveId;
-    let round = await redis.get(`driveId:${driveId}`);
-    const updateCandidate = await prisma.candidateTracking.update({
+  try {
+    const timeTaken: any = await redis.get(`${studentId}`);
+    console.log("timeTaken from redis :", timeTaken);
+    const existingCandidate = await prisma.drive.findFirst({
       where: {
-        driveId_studentId_round: {
-          studentId: studentId,
-          driveId: existingCandidate.CandidateTracking[0].driveId,
-          round: Number(round),
-        },
+        driveStatus: "pending",
       },
-      data: {
-        roundOneDurationTaken: timeTaken, // updaing the time Taken by the candidate
+      include: {
+        CandidateTracking: {
+          where: {
+            studentId: studentId,
+          },
+        },
       },
     });
-    // console.log("Hi", updateCandidate);
-    return true;
+
+    if (existingCandidate?.CandidateTracking.length) {
+      const driveId = existingCandidate?.driveId;
+      let round = await redis.get(`driveId:${driveId}`);
+      const updateCandidate = await prisma.candidateTracking.update({
+        where: {
+          driveId_studentId_round: {
+            studentId: studentId,
+            driveId: existingCandidate.CandidateTracking[0].driveId,
+            round: Number(round),
+          },
+        },
+        data: {
+          roundOneDurationTaken: timeTaken, // updaing the time Taken by the candidate
+        },
+      });
+      // console.log("Hi", updateCandidate);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    throw error
   }
-  return false;
 }
 
 export async function submitTestDao(submitted, studentId, round, driveId) {
@@ -440,8 +453,6 @@ export async function submitTestDao(submitted, studentId, round, driveId) {
 
     return submitTest ? true : false;
   } catch (error) {
-    // Handle any potential errors that may occur during the database operation
-    console.error("Error in submitTestDao:", error);
-    return false;
+    throw error
   }
 }

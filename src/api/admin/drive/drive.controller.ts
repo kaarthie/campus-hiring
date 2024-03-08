@@ -1,6 +1,3 @@
-import fs from "fs";
-import util from "util";
-import { pipeline } from "stream";
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import {
@@ -25,19 +22,21 @@ import { generateQuestion, getQuestionDetails } from "../questionGeneration/ques
 import redis from "../../../config/redis";
 import { resultDao } from "../candidateResults/result.dao";
 import { uploadCandidate } from "../../../services/candidateGeneration";
-import path from "path";
-import { json } from "stream/consumers";
-
-const pump = util.promisify(pipeline);
+import { collectStream } from "../../../utils/utils";
 
 export async function getDetails(request: FastifyRequest, reply: FastifyReply) {
-  const response = await getDriveDetails();
-  if (response) {
-    reply.code(200).send({ status: true, data: response });
-  } else {
-    reply
-      .code(403)
-      .send({ status: false, message: "error in fetching the drive details" });
+  try {
+    const response = await getDriveDetails();
+    if (response) {
+      reply.code(200).send({ status: true, data: response });
+    } else {
+      reply
+        .code(403)
+        .send({ status: false, message: "error in fetching the drive details" });
+    }
+  } catch (error) {
+    console.log("Error in getDetails: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -45,28 +44,33 @@ export async function addFeedback(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const {
-    labFacilitiesRating,
-    hospitalityRating,
-    internetBandwidthRating,
-    studentAbilityRating,
-    feedback,
-    driveId,
-  } = request.body as addFeedback;
-  const response = await drivefeedback(
-    labFacilitiesRating,
-    hospitalityRating,
-    internetBandwidthRating,
-    studentAbilityRating,
-    feedback,
-    driveId
-  );
-  if (response) {
-    reply.code(200).send({ status: true, message: "feedback added" });
-  } else {
-    reply
-      .code(403)
-      .send({ status: false, message: "error in adding the feedback details" });
+  try {
+    const {
+      labFacilitiesRating,
+      hospitalityRating,
+      internetBandwidthRating,
+      studentAbilityRating,
+      feedback,
+      driveId,
+    } = request.body as addFeedback;
+    const response = await drivefeedback(
+      labFacilitiesRating,
+      hospitalityRating,
+      internetBandwidthRating,
+      studentAbilityRating,
+      feedback,
+      driveId
+    );
+    if (response) {
+      reply.code(200).send({ status: true, message: "feedback added" });
+    } else {
+      reply
+        .code(403)
+        .send({ status: false, message: "error in adding the feedback details" });
+    }
+  } catch (error) {
+    console.log("Error in addFeedback: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -74,14 +78,19 @@ export async function removeFeedBack(
   request: FastifyRequest<{ Params: driveId }>,
   reply: FastifyReply
 ) {
-  const driveId = Number(request.params.id);
-  const response = await deleteFeedback(driveId);
-  if (response) {
-    reply.code(200).send({ status: true, message: "Feedback Deleted" });
-  } else {
-    reply
-      .code(403)
-      .send({ status: false, message: "Error in deleting a Feedback" });
+  try {
+    const driveId = Number(request.params.id);
+    const response = await deleteFeedback(driveId);
+    if (response) {
+      reply.code(200).send({ status: true, message: "Feedback Deleted" });
+    } else {
+      reply
+        .code(403)
+        .send({ status: false, message: "Error in deleting a Feedback" });
+    }
+  } catch (error) {
+    console.log("Error in removeFeedback: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -160,10 +169,8 @@ export async function addDrive(request: any, reply: FastifyReply) {
     );
     reply.code(200).send({ status: true, message: "Drive Created" });
   } catch (error) { 
-    console.log("Error in drive creation");
-    reply
-      .code(500) 
-      .send({ status: false, message: error.message });
+    console.log("Error in addDrive: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -171,14 +178,19 @@ export async function deleteDrive(
   request: FastifyRequest<{ Params: driveId }>,
   reply: FastifyReply
 ) {
-  const driveId = Number(request.params.id);
-  const response = await deleteDriveDao(driveId);
-  if (response) {
-    reply.code(200).send({ status: true, message: "Drive Deleted" });
-  } else {
-    reply
-      .code(403)
-      .send({ status: false, message: "Error in deleting a Drive" });
+  try {
+    const driveId = Number(request.params.id);
+    const response = await deleteDriveDao(driveId);
+    if (response) {
+      reply.code(200).send({ status: true, message: "Drive Deleted" });
+    } else {
+      reply
+        .code(403)
+        .send({ status: false, message: "Error in deleting a Drive" });
+    }
+  } catch (error) {
+    console.log("Error in getDrives: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -186,87 +198,75 @@ export async function getCampusYears(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const response = await campusYears();
-  if (response) {
-    reply.code(200).send({ status: true, data: response });
-  } else {
-    reply
-      .code(403)
-      .send({ status: false, message: "Error in getting a campus Years" });
+  try {
+    const response = await campusYears();
+    if (response) {
+      reply.code(200).send({ status: true, data: response });
+    } else {
+      reply
+        .code(403)
+        .send({ status: false, message: "Error in getting a campus Years" });
+    }
+  } catch (error) {
+    console.log("Error in getCampusYears: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
 export async function startDrive(request: FastifyRequest, reply: FastifyReply) {
-  const { driveId } = request.body as startRound;
-  //round set
-  const round = 1;
-  let response = await redis.set(`driveId:${driveId}`, JSON.stringify(round));
-  let res = await updateDriveStatus(driveId);
-  const status = "started";
-  const questionGeneration = await generateQuestion();
-  let roundStatus = await updateRoundStatus(driveId, round, status);
-  // console.log(roundStatus)
-  if (response || res) {
-    reply.code(200).send({
-      status: true,
-      message:
-        "redis - Data added and drive status updated and QuestionSetGenerated",
-      redis: response,
-    });
-  } else {
-    reply
-      .code(403)
-      .send({ status: false, message: "Error in adding a campus drive" });
+  try {
+    const { driveId } = request.body as startRound;
+    //round set
+    const round = 1;
+    let response = await redis.set(`driveId:${driveId}`, JSON.stringify(round));
+    let res = await updateDriveStatus(driveId);
+    const status = "started";
+    const questionGeneration = await generateQuestion();
+    let roundStatus = await updateRoundStatus(driveId, round, status);
+    // console.log(roundStatus)
+    if (response || res) {
+      reply.code(200).send({
+        status: true,
+        message:
+          "redis - Data added and drive status updated and QuestionSetGenerated",
+        redis: response,
+      });
+    } else {
+      reply
+        .code(403)
+        .send({ status: false, message: "Error in adding a campus drive" });
+    }
+  } catch (error) {
+    console.log("Error in startDrive: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
 export async function stopDrive(request: FastifyRequest, reply: FastifyReply) {
-  const { driveId } = request.body as startRound;
-  // let roundId = await redis.get(`driveId:${driveId}`);
-  let round = 1;
-  const results: any = await resultDao(round);
-  // console.log(results);
-  let response = await redis.del(`driveId:${driveId}`);
-  const status = "completed";
-  let roundStatus = await updateRoundStatus(driveId, round, status);
-  let updateDrive = await updateDriveStatusCompleted(driveId, round);
-  if (results || response || roundStatus) {
-    reply.code(200).send({
-      status: true,
-      message: "redis - Data deleted and drive status updated",
-      results: results,
-    });
-  } else {
-    reply
-      .code(403)
-      .send({ status: false, message: "Error in deleting a campus drive" });
-  }
-}
-
-export async function uploadDatabase(req, rep) {
-  console.log("hi");
-  const data = await req.file();
   try {
-    const buffer = await data.toBuffer();
-    console.log("hi");
-  } catch (err) {
-    // fileSize limit reached!
+    const { driveId } = request.body as startRound;
+    // let roundId = await redis.get(`driveId:${driveId}`);
+    let round = 1;
+    const results: any = await resultDao(round);
+    // console.log(results);
+    let response = await redis.del(`driveId:${driveId}`);
+    const status = "completed";
+    let roundStatus = await updateRoundStatus(driveId, round, status);
+    let updateDrive = await updateDriveStatusCompleted(driveId, round);
+    if (results || response || roundStatus) {
+      reply.code(200).send({
+        status: true,
+        message: "redis - Data deleted and drive status updated",
+        results: results,
+      });
+    } else {
+      reply
+        .code(403)
+        .send({ status: false, message: "Error in deleting a campus drive" });
+    }
+  } catch (error) {
+    console.log("Error in stopDrive: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
-  // console.log(parts);
-  // const pump = util.promisify(pipeline)
-  // for await (const part of parts) {
-  //     // upload and save the file
-  // await pump(data.file, fs.createWriteStream(`../../files/${data.filename}`))
-
-  // }
-
-  return { message: "files uploaded" };
-}
-async function collectStream(stream) {
-  let data = Buffer.alloc(0);
-  for await (const chunk of stream) {
-    data = Buffer.concat([data, chunk]);
-  }
-  return data;
 }
 

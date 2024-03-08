@@ -43,8 +43,7 @@ export async function verifyCandidate(
         .send({ status: false, message: "user does not exist in the database" });
     }
   } catch (error) {
-    reply
-    .code(500)
-    .send({ status: true, message: error.message });
+    console.log("Error in verifyCandidate: ", error);
+    reply.code(500).send({ status: true, message: error.message });
   }
 }

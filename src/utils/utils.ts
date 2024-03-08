@@ -1,4 +1,3 @@
-// import { shuffle } from "lodash";
 import XlsxPopulate from "xlsx-populate";
 import path from "path";
 import { cloudinary } from "../config/cloudinary";
@@ -109,4 +108,17 @@ export function shuffleQuestionOptions(question: any): any {
   }
 
   return shuffledOptions;
+}
+
+export async function collectStream(stream) {
+  try {
+    let data = Buffer.alloc(0);
+    for await (const chunk of stream) {
+      data = Buffer.concat([data, chunk]);
+    }
+    return data;
+  } catch (error) {
+    console.log("Error in collectStream: ",error);
+    throw error
+  }
 }

@@ -29,7 +29,7 @@ export async function getDriveDetails() {
     console.log(filteredCampuses);
     return filteredCampuses;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -54,7 +54,7 @@ export async function drivefeedback(
     });
     return res;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -67,8 +67,7 @@ export async function deleteFeedback(id) {
     });
     return true;
   } catch (error) {
-    // return error;
-    console.log(error);
+    throw error
   }
 }
 
@@ -145,7 +144,7 @@ export async function createNewDrive(
     console.log("Recruitment Members  --->>>  ", JSON.stringify(recruitmentMembers));
     return { result };
   } catch (error) {
-    console.log("Error in Drive Dao ",error.message);
+    throw error
   }
 }
 
@@ -225,7 +224,7 @@ export async function deleteDriveDao(driveId) {
     // console.log('Drive data and related records deleted successfully.');
     return true;
   } catch (error) {
-    console.log("Error deleting drive data:", error);
+    throw error
   }
 }
 
@@ -237,7 +236,7 @@ export async function campusYears() {
     }
     return false;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -253,7 +252,7 @@ export async function updateDriveStatus(driveId) {
     });
     return true;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -272,7 +271,7 @@ export async function updateRoundStatus(driveId, roundId, status) {
     });
     return true;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -302,6 +301,6 @@ export async function updateDriveStatusCompleted(driveId, roundId) {
     }
     return true;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }

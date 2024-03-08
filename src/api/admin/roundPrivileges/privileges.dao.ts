@@ -51,7 +51,7 @@ export async function addPrivilege(IsSkipped, roundId) {
       return newPrivileges;
     }
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -70,7 +70,7 @@ export async function getPrivilegeDao() {
     console.log(round + " get privilege Dao");
     if (res) return res?.RoundPrivileges[Number(round) - 1];
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -152,7 +152,7 @@ export async function trackCandidateDao(startTime, studentId) {
       return createCandidate;
     }
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -202,7 +202,7 @@ export async function addRound(body: any) {
 
     return result;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -248,7 +248,6 @@ export async function getRound() {
 
     return false;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 }

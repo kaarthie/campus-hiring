@@ -132,7 +132,7 @@ export async function resultDao(roundId) {
     }
     return true;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -148,7 +148,7 @@ export async function resultDeletionDao(id) {
     });
     return response;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -176,7 +176,7 @@ export async function getDrives() {
 
     return response;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -239,94 +239,98 @@ export async function driveResults(driveId) {
     // console.log(results, loginAttemptsCount, submittedTestCount);
     // return response;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
 export async function resultsWithScores(driveId, id) {
-  const groupedScore = await prisma.results.groupBy({
-    by: ["score"],
-    _count: true,
-    orderBy: {
-      score: "desc",
-    },
-    where: {
-      driveId: driveId.driveId,
-    },
-  } as any);
-  const candidateIdsByScore = await Promise.all(
-    groupedScore.map(async (result) => {
-      const candidates = await prisma.results.findMany({
-        where: {
-          driveId: driveId.driveId,
-          score: result.score,
-        },
-        select: {
-          candidateId: true,
-        },
-      });
-
-      return {
-        score: result.score,
-        student_count: result._count,
-        candidates,
-      };
-    })
-  );
-  console.log(id);
-
-  const candidateIds = candidateIdsByScore.flatMap((entry) =>
-    entry.candidates.map((candidate) => candidate.candidateId)
-  );
-
-  // Fetch student details from another table
-  const students = await prisma.candidateDetailsCollege.findMany({
-    where: {
-      studentId: {
-        in: candidateIds,
+  try {
+    const groupedScore = await prisma.results.groupBy({
+      by: ["score"],
+      _count: true,
+      orderBy: {
+        score: "desc",
       },
-    },
-    select: {
-      studentId: true,
-      registerNumber: true,
-      name: true,
-      email: true,
-      college: true,
-      branch: true,
-      dateOfBirth: true,
-      gender: true,
-      mobileNumber: true,
-    },
-  });
-
-  // Map student details into candidate objects
-  const combinedData = candidateIdsByScore.map((entry) => {
-    const candidatesWithStudents = entry.candidates.map((candidate) => {
-      const student = students.find(
-        (s) => s.studentId === candidate.candidateId
-      );
+      where: {
+        driveId: driveId.driveId,
+      },
+    } as any);
+    const candidateIdsByScore = await Promise.all(
+      groupedScore.map(async (result) => {
+        const candidates = await prisma.results.findMany({
+          where: {
+            driveId: driveId.driveId,
+            score: result.score,
+          },
+          select: {
+            candidateId: true,
+          },
+        });
+  
+        return {
+          score: result.score,
+          student_count: result._count,
+          candidates,
+        };
+      })
+    );
+    console.log(id);
+  
+    const candidateIds = candidateIdsByScore.flatMap((entry) =>
+      entry.candidates.map((candidate) => candidate.candidateId)
+    );
+  
+    // Fetch student details from another table
+    const students = await prisma.candidateDetailsCollege.findMany({
+      where: {
+        studentId: {
+          in: candidateIds,
+        },
+      },
+      select: {
+        studentId: true,
+        registerNumber: true,
+        name: true,
+        email: true,
+        college: true,
+        branch: true,
+        dateOfBirth: true,
+        gender: true,
+        mobileNumber: true,
+      },
+    });
+  
+    // Map student details into candidate objects
+    const combinedData = candidateIdsByScore.map((entry) => {
+      const candidatesWithStudents = entry.candidates.map((candidate) => {
+        const student = students.find(
+          (s) => s.studentId === candidate.candidateId
+        );
+        return {
+          ...candidate,
+          ...student,
+        };
+      });
+  
       return {
-        ...candidate,
-        ...student,
+        ...entry,
+        candidates: candidatesWithStudents,
       };
     });
-
-    return {
-      ...entry,
-      candidates: candidatesWithStudents,
-    };
-  });
-  console.log("Combined Results " + JSON.stringify(combinedData));
-
-  if (!id) {
-    return combinedData;
-  } else {
-    const Result = combinedData.filter((scores) => {
-      return scores.score >= id;
-    });
-    console.log(driveId);
-    const DataLink = await generateExcel(Result, driveId);
-    console.log(DataLink);
-    return { FilteredCandidates: Result, ExcelLink: DataLink };
+    console.log("Combined Results " + JSON.stringify(combinedData));
+  
+    if (!id) {
+      return combinedData;
+    } else {
+      const Result = combinedData.filter((scores) => {
+        return scores.score >= id;
+      });
+      console.log(driveId);
+      const DataLink = await generateExcel(Result, driveId);
+      console.log(DataLink);
+      return { FilteredCandidates: Result, ExcelLink: DataLink };
+    }
+  } catch (error) {
+    throw error
   }
 }

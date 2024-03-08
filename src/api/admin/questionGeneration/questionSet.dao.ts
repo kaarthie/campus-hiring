@@ -146,7 +146,7 @@ export async function generateQuestion() {
     }
     return true;
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 
@@ -182,8 +182,6 @@ export async function getQuestionDetails() {
     console.log(result);
     return result;
   } catch (error) {
-    // Handle error
-    console.error("Error fetching question details:", error);
     throw error;
   }
 }
@@ -227,6 +225,6 @@ export async function getAdminQuestionSet() {
       return false;
     }
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }

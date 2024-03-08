@@ -13,7 +13,6 @@ export async function checkAdmin(email: string) {
       return false;
     }
   } catch (error) {
-    console.log("Error occured in checkAdmin:", error)
     throw error
   }
 
@@ -32,7 +31,6 @@ export async function createAdmin(email: string) {
       return false;
     }
   } catch (error) {
-    console.log("Error occured in createAdmin:", error)
     throw error
   }
 }

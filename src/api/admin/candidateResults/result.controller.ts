@@ -26,14 +26,19 @@ export async function resultDeletion(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const driveId = request.body as { driveId: number };
-  const result = await resultDeletionDao(driveId);
-  if (result) {
-    reply
-      .code(200)
-      .send({ status: true, message: "Results deleted", result: result });
-  } else {
-    reply.code(200).send({ status: false, message: "couldn't Delete results" });
+  try {
+    const driveId = request.body as { driveId: number };
+    const result = await resultDeletionDao(driveId);
+    if (result) {
+      reply
+        .code(200)
+        .send({ status: true, message: "Results deleted", result: result });
+    } else {
+      reply.code(404).send({ status: false, message: "couldn't Delete results" });
+    }
+  } catch (error) {
+    console.log("Error in resultDeletion: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -41,13 +46,18 @@ export async function completedandPendingDrives(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const result = await getDrives();
-  if (result) {
-    reply.code(200).send({ status: true, data: result });
-  } else {
-    reply
-      .code(200)
-      .send({ status: false, message: "couldn't get completed drives" });
+  try {
+    const result = await getDrives();
+    if (result) {
+      reply.code(200).send({ status: true, data: result });
+    } else {
+      reply
+        .code(404)
+        .send({ status: false, message: "couldn't get completed drives" });
+    }
+  } catch (error) {
+    console.log("Error in getDrives: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -55,23 +65,28 @@ export async function driveResult(
   request: FastifyRequest<{ Params: driveId }>,
   reply: FastifyReply
 ) {
-  // const results = await resultDao();
-  const driveId = Number(request.params.id);
-  const report = await driveResults(driveId);
-  // console.log(report)
-  if (report) {
-    reply.code(200).send({
-      status: true,
-      result: report?.results,
-      testStartedCount: report?.loginAttemptsCount,
-      testSubmittedCount: report?.submittedTestCount,
-      notstarted: report?.notstarted,
-    });
-  } else {
-    reply.code(200).send({
-      status: false,
-      message: "couldn't get completed drives and results",
-    });
+  try {
+    // const results = await resultDao();
+    const driveId = Number(request.params.id);
+    const report = await driveResults(driveId);
+    // console.log(report)
+    if (report) {
+      reply.code(200).send({
+        status: true,
+        result: report?.results,
+        testStartedCount: report?.loginAttemptsCount,
+        testSubmittedCount: report?.submittedTestCount,
+        notstarted: report?.notstarted,
+      });
+    } else {
+      reply.code(404).send({
+        status: false,
+        message: "couldn't get completed drives and results",
+      });
+    }
+  } catch (error) {
+    console.log("Error in driveResult: ", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -85,8 +100,8 @@ export async function filteredResult(
     const Results = await resultsWithScores(driveId, rankId);
     // const generatedFile = await generateExcel();
     reply.status(200).send(Results);
-  } catch (err) {
-    console.log(err);
-    reply.status(403).send(err);
+  } catch (error) {
+    console.log("Error in filteredResult: ", error);
+    reply.code(500).send({message: error.message });
   }
 }

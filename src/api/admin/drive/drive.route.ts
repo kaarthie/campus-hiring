@@ -57,12 +57,6 @@ const driveRoutes: IRouteOptions<{
             handler: stopDrive,
             preHandler: [jwtAdminVerification],
             method: API_METHODS.PUT,
-        },
-        {
-            url: '/uploadDatabase',
-            handler: uploadDatabase,
-            preHandler: [jwtAdminVerification],
-            method: API_METHODS.POST,
         }
     ];
 
