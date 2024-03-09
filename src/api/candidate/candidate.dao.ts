@@ -453,6 +453,6 @@ export async function submitTestDao(submitted, studentId, round, driveId) {
 
     return submitTest ? true : false;
   } catch (error) {
-    throw error
+    console.log(error);
   }
 }

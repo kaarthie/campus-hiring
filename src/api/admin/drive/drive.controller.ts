@@ -97,14 +97,14 @@ export async function removeFeedBack(
 export async function addDrive(request: any, reply: FastifyReply) {
   try {
     const data = {};
+    let excelExists = false;
+    let fileData;
     console.log(await getQuestionDetails());
     // Iterate over each field in the form-data
     for await (const part of request.parts()) {
       if (part.file) {
-        const fileData = await collectStream(part.file);
-        // Process the Excel file without saving
-        const excelData = await uploadCandidate(fileData);
-        console.log(excelData);
+        excelExists = true
+        fileData = await collectStream(part.file);
 
       } else {
         // If the part is a field, store its value
@@ -167,8 +167,14 @@ export async function addDrive(request: any, reply: FastifyReply) {
       totalQuestions,
       questionData
     );
+    if (excelExists) {
+      const excelData = await uploadCandidate(fileData);
+      console.log(excelData);
+    } else {
+      throw new Error("Upload Students Data")
+    }
     reply.code(200).send({ status: true, message: "Drive Created" });
-  } catch (error) { 
+  } catch (error) {
     console.log("Error in addDrive: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }

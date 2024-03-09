@@ -4,7 +4,7 @@ export async function checkCandidate(email: string) {
   try {
     const drive = await prisma.drive.findFirst({
       where: {
-        driveStatus: "upcoming",
+        driveStatus: "pending",
       },
       include: {
         CandidateDetailsCollege: {

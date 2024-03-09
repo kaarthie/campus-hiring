@@ -130,7 +130,7 @@ export async function trackCandidateDao(startTime, studentId) {
       let round = await redis.get(`driveId:${driveId}`);
       const roundDuration = await prisma.rounds.findFirst({
         where: {
-          round: Number(round),
+          driveId: driveId,
         },
         select: {
           roundDuration: true,

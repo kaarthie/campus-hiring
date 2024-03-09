@@ -20,27 +20,31 @@ export async function shuffle(questionSet) {
   }, {});
   return numberedObject;
 }
+
 export async function generateExcel(Result, driveId) {
-  const workbook = await XlsxPopulate.fromBlankAsync();
+  try {
+    const workbook = await XlsxPopulate.fromBlankAsync();
     const sheet = workbook.sheet("Sheet1");
-    console.log("Hiii");
+
     // Add headers
-    const headers = [
-      "score",
-      "student_count",
-      "candidateId",
-      "studentId",
-      "registerNumber",
-      "name",
-      "email",
-      "college",
-      "branch",
-      "dateOfBirth",
-      "gender",
-      "mobileNumber",
-    ];
-    headers.forEach((header, index) => {
+    const headerWidths = {
+      Score: 8,
+      "Student Count": 15,
+      "Candidate Id": 15,
+      "Student Id": 10,
+      "Register Number": 15,
+      Name: 20,
+      Email: 40,
+      College: 20,
+      Branch: 15,
+      "Date Of Birth": 15,
+      Gender: 12,
+      "Mobile Number": 15,
+    };
+
+    Object.entries(headerWidths).forEach(([header, width], index) => {
       sheet.cell(1, index + 1).value(header);
+      sheet.column(index + 1).width(width);
     });
 
     // Populate the sheet with data
@@ -63,27 +67,26 @@ export async function generateExcel(Result, driveId) {
       });
     });
 
+    const timestamp = new Date().toISOString();
+
     pathToExcel = path.join(
       __dirname +
         `../../NextRoundStudents/` +
-        `studentsData${-Number(driveId)}.xlsx`
+        `studentsData-${timestamp}-${driveId}.xlsx`
     );
-    console.log(pathToExcel + " pathToExcel");
-    workbook.toFileAsync(pathToExcel);
 
+    await workbook.toFileAsync(pathToExcel);
 
-  const resultant = await cloudinary.uploader.upload(pathToExcel, {
-    resource_type: "raw", // Specify raw file type
-    public_id: `studentData-drive-${driveId}`, // Set a unique identifier for the file
-    tags: ["excel", "files"], // Assign tags for better organization
-  });
-  console.log(resultant.secure_url);
-  return resultant.secure_url;
-  console.log("Excel file saved successfully");
+    const resultant = await cloudinary.uploader.upload(pathToExcel, {
+      resource_type: "raw",
+      public_id: `studentData-drive-${timestamp}-${driveId}`,
+      tags: ["excel", "files"],
+    });
 
-  // .catch((error) => {
-  //   console.error("Error:", error);
-  // });
+    return resultant.secure_url;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export function getRandomNumber(range: number): number {

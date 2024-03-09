@@ -6,7 +6,7 @@ import { generateExcel } from "../../../utils/utils";
 
 export async function resultDao(roundId) {
   try {
-    const questions = await prisma.drive.findMany({
+    const questions: any = await prisma.drive.findFirst({
       where: {
         driveStatus: "pending",
       },
@@ -22,7 +22,8 @@ export async function resultDao(roundId) {
         },
       },
     });
-    const totalQuestions = questions[0].questionSet;
+
+    const totalQuestions = questions.questionSet;
     const questionIds = totalQuestions.map((question) => question.questionId);
     const correctAnswers = await prisma.mcqs.findMany({
       where: {
@@ -32,11 +33,11 @@ export async function resultDao(roundId) {
       },
       select: {
         id: true,
-        answer: true, // mapping questions with the original answers
+        answer: true,
       },
     });
-    // console.log(correctAnswers);
-    const candidateResponses = await prisma.drive.findMany({
+
+    const candidateResponses: any = await prisma.drive.findFirst({
       where: {
         driveStatus: "pending",
       },
@@ -54,87 +55,55 @@ export async function resultDao(roundId) {
         },
       },
     });
-    let candidateAnswers = candidateResponses[0].Answer;
-    let foundCorrectAnswer = false;
-    // console.log(candidateAnswers);
-    for (let response of candidateAnswers) {
-      const driveId = questions[0].driveId;
-      const questionId = response.questionId;
-      const answer = response.answer;
-      const candidateId = response.candidateId;
-      const round = response.roundId;
-      const correctAnswer = correctAnswers.find((ans) => ans.id === questionId);
-      console.log("Correct answer from resultDao " + correctAnswer);
-      if (correctAnswer && correctAnswer.answer === answer) {
-        console.log("correctAnswer", questionId, answer);
-        const existingCandidate = await prisma.results.findFirst({
-          where: {
-            driveId: driveId,
-            candidateId: candidateId,
-            round: round,
-          },
-        });
-        // console.log("correct");
-        const res = await prisma.results.upsert({
-          where: {
-            driveId_candidateId_round: {
-              driveId: driveId,
-              candidateId: candidateId,
-              round: round,
-            },
-          },
-          update: {
-            score: {
-              increment: 1,
-            },
-          },
-          create: {
-            driveId: driveId,
-            candidateId: candidateId,
-            round: round,
-            score: 1,
-          },
-        });
-      } else {
-        const driveId = questions[0].driveId;
-        const candidateId = response.candidateId;
-        const round = response.roundId; // Assuming the roundId is the same for all answers
-        console.log("wrong Anser");
-        const existingCandidate = await prisma.results.findFirst({
-          where: {
-            driveId: driveId,
-            candidateId: candidateId,
-            round: round,
-          },
-        });
 
-        const res = await prisma.results.upsert({
-          where: {
-            driveId_candidateId_round: {
-              driveId: driveId,
-              candidateId: candidateId,
-              round: round,
-            },
-          },
-          update: {
-            score: {
-              increment: 0,
-            },
-          },
-          create: {
-            driveId: driveId,
-            candidateId: candidateId,
-            round: round,
-            score: 0,
-          },
-        });
+    const groupedResponses = candidateResponses.Answer.reduce(
+      (acc, response) => {
+        const candidateId = response.candidateId;
+        if (!acc[candidateId]) {
+          acc[candidateId] = [];
+        }
+        acc[candidateId].push(response);
+        return acc;
+      },
+      {}
+    );
+
+    const resultsToCreate: any = [];
+
+    for (const candidateId in groupedResponses) {
+      const candidateAnswers = groupedResponses[candidateId];
+      let score = 0;
+
+      for (const response of candidateAnswers) {
+        const questionId = response.questionId;
+        const answer = response.answer;
+        const correctAnswer = correctAnswers.find(
+          (ans) => ans.id === questionId
+        );
+
+        if (correctAnswer && correctAnswer.answer === answer) {
+          score++;
+        }
       }
+      console.log(candidateAnswers);
+
+      resultsToCreate.push({
+        driveId: questions.driveId,
+        candidateId: parseInt(candidateId),
+        round: candidateAnswers[0].roundId,
+        score: score,
+      });
     }
-    return true;
+
+    await prisma.results.createMany({
+      data: resultsToCreate,
+    });
+    
   } catch (error) {
-    throw error
+    console.log(error);
   }
 }
+
 
 export async function resultDeletionDao(id) {
   try {
