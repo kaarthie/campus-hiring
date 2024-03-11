@@ -22,6 +22,6 @@ export async function checkCandidate(email: string) {
       return false;
     }
   } catch (error) {
-    throw error
+    console.log("Error in checkCandidate:", error);
   }
 }

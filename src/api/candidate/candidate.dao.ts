@@ -17,7 +17,7 @@ export async function getCollegeDao() {
 
     return result?.college || false;
   } catch (error) {
-    throw error
+    console.log("Error in getCollegeDao:", error);
   }
 }
 
@@ -30,7 +30,7 @@ export async function campusYear(id: number) {
     });
     return res;
   } catch (error) {
-    throw error
+    console.log("Error in campusYear:", error);
   }
 
 }
@@ -79,7 +79,7 @@ export async function storeAnswerDao(questionId, studentId, userAnswer, round) {
       return true;
     }
   } catch (error) {
-    throw error
+    console.log("Error in storeAnswerDao:", error);
   }
 }
 
@@ -110,7 +110,7 @@ export async function loginAttempts(studentId) {
       };
     else return { attempts: 0, round: round };
   } catch (error) {
-    throw error
+    console.log("Error in loginAttempts:", error);
   }
 }
 
@@ -154,7 +154,7 @@ export async function driveInstructions() {
     // }
     return generalInstructions;
   } catch (error) {
-    throw error
+    console.log("Error in driveInstructions:", error);
   }
 }
 
@@ -206,7 +206,7 @@ export async function lastAnsweredQuestion(studentId) {
       return { questionid: questionId?.questionId, id: 1 };
     }
   } catch (error) {
-    throw error
+    console.log("Error in lastAnsweredQuestion:", error);
   }
 }
 
@@ -239,7 +239,7 @@ export async function getMcq(questionId) {
       return false;
     }
   } catch (error) {
-    throw error
+    console.log("Error in getMcq:", error);
   }
 }
 
@@ -385,7 +385,7 @@ export async function getcandidateQuestionSet(studentId) {
     }
     return false;
   } catch (error) {
-    throw error
+    console.log("Error in getcandidateQuestionSet:", error);
   }
 }
 
@@ -426,7 +426,7 @@ export async function storeCandidateTime(studentId) {
     }
     return false;
   } catch (error) {
-    throw error
+    console.log("Error in storeCandidateTime:", error);
   }
 }
 
@@ -453,6 +453,6 @@ export async function submitTestDao(submitted, studentId, round, driveId) {
 
     return submitTest ? true : false;
   } catch (error) {
-    console.log(error);
+    console.log("Error in submitTestDao: ",error);
   }
 }

@@ -136,6 +136,7 @@ export async function generateQuestion() {
             round: round,
             questionId: Number(question.id),
           }));
+          console.log(questionSetData);
           const response = await prisma.questionSet.createMany({
             data: questionSetData,
           });
@@ -146,7 +147,7 @@ export async function generateQuestion() {
     }
     return true;
   } catch (error) {
-    throw error
+    console.log("Error in generateQuestion:", error);
   }
 }
 
@@ -182,7 +183,7 @@ export async function getQuestionDetails() {
     console.log(result);
     return result;
   } catch (error) {
-    throw error;
+    console.log("Error in getQuestionDetails:", error);;
   }
 }
 
@@ -225,6 +226,6 @@ export async function getAdminQuestionSet() {
       return false;
     }
   } catch (error) {
-    throw error
+    console.log("Error in getAdminQuestionSet:", error);
   }
 }

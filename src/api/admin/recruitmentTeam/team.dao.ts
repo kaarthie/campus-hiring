@@ -6,7 +6,7 @@ export async function getMembers() {
     const availableMembers = await prisma.recruitmentTeamMembers.findMany();
     return availableMembers;
   } catch (error) {
-    throw error
+    console.log("Error in getMembers:", error);
   }
 }
 
@@ -45,7 +45,7 @@ export async function addMember(name, email, position) {
       message: "Failed to create user.",
     };
   } catch (error) {
-    throw error
+    console.log("Error in addMember:", error);
   }
 }
 
@@ -58,7 +58,7 @@ export async function deleteMember(id) {
     });
     return true;
   } catch (error) {
-    throw error
+    console.log("Error in deleteMember:", error);
   }
 }
 
@@ -99,7 +99,7 @@ export async function updateTeamMember(id, name, email, position) {
       };
     }
   } catch (error) {
-    throw error
+    console.log("Error in updateTeamMember:", error);
   }
 
   // try {

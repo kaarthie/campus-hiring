@@ -29,7 +29,7 @@ export async function getDriveDetails() {
     console.log(filteredCampuses);
     return filteredCampuses;
   } catch (error) {
-    throw error
+    console.log("Error in getDriveDetails:", error);
   }
 }
 
@@ -54,7 +54,7 @@ export async function drivefeedback(
     });
     return res;
   } catch (error) {
-    throw error
+    console.log("Error in drivefeedback:", error);
   }
 }
 
@@ -67,7 +67,7 @@ export async function deleteFeedback(id) {
     });
     return true;
   } catch (error) {
-    throw error
+    console.log("Error in deletefeedback:", error);
   }
 }
 
@@ -144,7 +144,7 @@ export async function createNewDrive(
     console.log("Recruitment Members  --->>>  ", JSON.stringify(recruitmentMembers));
     return { result };
   } catch (error) {
-    throw error
+    console.log("Error in createNewDrive:", error);
   }
 }
 
@@ -224,7 +224,7 @@ export async function deleteDriveDao(driveId) {
     // console.log('Drive data and related records deleted successfully.');
     return true;
   } catch (error) {
-    throw error
+    console.log("Error in deleteDriveDao:", error);
   }
 }
 
@@ -236,7 +236,7 @@ export async function campusYears() {
     }
     return false;
   } catch (error) {
-    throw error
+    console.log("Error in campusYears:", error);
   }
 }
 
@@ -252,7 +252,7 @@ export async function updateDriveStatus(driveId) {
     });
     return true;
   } catch (error) {
-    throw error
+    console.log("Error in updateDriveStatus:", error);
   }
 }
 
@@ -271,7 +271,7 @@ export async function updateRoundStatus(driveId, roundId, status) {
     });
     return true;
   } catch (error) {
-    throw error
+    console.log("Error in updateRoundStatus:", error);
   }
 }
 
@@ -301,6 +301,6 @@ export async function updateDriveStatusCompleted(driveId, roundId) {
     }
     return true;
   } catch (error) {
-    throw error
+    console.log("Error in updateDriveStatusCompleted:", error);
   }
 }

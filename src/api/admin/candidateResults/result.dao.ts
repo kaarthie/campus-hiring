@@ -23,6 +23,10 @@ export async function resultDao(roundId) {
       },
     });
 
+    if (!questions) {
+      throw new Error("No pending drive found for the given round ID");
+    }
+
     const totalQuestions = questions.questionSet;
     const questionIds = totalQuestions.map((question) => question.questionId);
     const correctAnswers = await prisma.mcqs.findMany({
@@ -55,6 +59,11 @@ export async function resultDao(roundId) {
         },
       },
     });
+
+    if (!candidateResponses || !candidateResponses.Answer.length) {
+      console.log("No candidate answers found for the given round ID");
+      return;
+    }
 
     const groupedResponses = candidateResponses.Answer.reduce(
       (acc, response) => {
@@ -95,12 +104,15 @@ export async function resultDao(roundId) {
       });
     }
 
-    await prisma.results.createMany({
-      data: resultsToCreate,
-    });
-    
+    if (resultsToCreate.length > 0) {
+      await prisma.results.createMany({
+        data: resultsToCreate,
+      });
+    } else {
+      console.log("No results to create");
+    }
   } catch (error) {
-    console.log(error);
+    console.error("Error in resultDao:", error);
   }
 }
 
@@ -117,7 +129,7 @@ export async function resultDeletionDao(id) {
     });
     return response;
   } catch (error) {
-    throw error
+    console.log("Error in resultDeletionDao:", error);
   }
 }
 
@@ -145,7 +157,7 @@ export async function getDrives() {
 
     return response;
   } catch (error) {
-    throw error
+    console.log("Error in getDrives:", error);
   }
 }
 
@@ -208,7 +220,7 @@ export async function driveResults(driveId) {
     // console.log(results, loginAttemptsCount, submittedTestCount);
     // return response;
   } catch (error) {
-    throw error
+    console.log("Error in driveResults:", error);
   }
 }
 
@@ -300,6 +312,6 @@ export async function resultsWithScores(driveId, id) {
       return { FilteredCandidates: Result, ExcelLink: DataLink };
     }
   } catch (error) {
-    throw error
+    console.log("Error in resultsWithScores:", error);
   }
 }
