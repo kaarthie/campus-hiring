@@ -32,7 +32,6 @@ export async function campusYear(id: number) {
   } catch (error) {
     console.log("Error in campusYear:", error);
   }
-
 }
 
 export async function storeAnswerDao(questionId, studentId, userAnswer, round) {
@@ -111,6 +110,19 @@ export async function loginAttempts(studentId) {
     else return { attempts: 0, round: round };
   } catch (error) {
     console.log("Error in loginAttempts:", error);
+  }
+}
+
+export async function checkSubmitted(studentId) {
+  try {
+    const response: any = await prisma.submitTest.findFirst({
+      where: {
+        candidateId: studentId,
+      },
+    });
+    return response?.length > 0;
+  } catch (error) {
+    console.log("Error in checkSubmitted() ->", error);
   }
 }
 
@@ -453,6 +465,6 @@ export async function submitTestDao(submitted, studentId, round, driveId) {
 
     return submitTest ? true : false;
   } catch (error) {
-    console.log("Error in submitTestDao: ",error);
+    console.log("Error in submitTestDao: ", error);
   }
 }

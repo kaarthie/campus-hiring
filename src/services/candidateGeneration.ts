@@ -30,9 +30,9 @@ export const uploadCandidate = async (fileStream) => {
       "email",
       "address",
     ];
-    let file = xlsx.read(fileStream, { type: 'buffer' });
+    let file = xlsx.read(fileStream, { type: "buffer" });
     const sheets = file.SheetNames;
-  
+
     for (let i = 0; i < sheets.length; i++) {
       const temp = xlsx.utils.sheet_to_json(file.Sheets[file.SheetNames[i]]);
       temp.forEach(async (res: any) => {
@@ -95,7 +95,7 @@ export const uploadCandidate = async (fileStream) => {
           //   email,
           //   address
           // );
-          await prisma.candidateDetailsCollege.create({
+          const response = await prisma.candidateDetailsCollege.create({
             data: {
               driveId: driveId.driveId,
               registerNumber: registerNumber,
@@ -140,12 +140,13 @@ export const uploadCandidate = async (fileStream) => {
               address: address,
             },
           });
+          return response;
         } else {
-            console.log("Could not find driveID");
+          console.log("Could not find driveID");
         }
       });
     }
   } catch (error) {
-    throw error
+    throw error;
   }
 };

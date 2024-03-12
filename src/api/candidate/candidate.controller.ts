@@ -9,6 +9,7 @@ import {
   getMcq,
   getcandidateQuestionSet,
   storeCandidateTime,
+  checkSubmitted,
 } from "./candidate.dao";
 import redis from "../../config/redis";
 import {
@@ -58,13 +59,17 @@ export async function candidateAnswer(
           .code(200)
           .send({ status: true, message: "Answer Stored", questionData: mcq });
       } else {
-        reply.code(404).send({ status: false, message: "Couldn't store answer" });
+        reply
+          .code(404)
+          .send({ status: false, message: "Couldn't store answer" });
       }
     } else {
       if (response) {
         reply.code(200).send({ status: true, message: "Answer Stored" });
       } else {
-        reply.code(404).send({ status: false, message: "Couldn't store answer" });
+        reply
+          .code(404)
+          .send({ status: false, message: "Couldn't store answer" });
       }
     }
   } catch (error) {
@@ -83,6 +88,7 @@ export async function candidateInstructions(
     // console.log(instructions);
     const attempts = await loginAttempts(studentId);
     console.log(attempts);
+    const submitted = await checkSubmitted(studentId);
     const loginAttemptsByCandidate = attempts.attempts;
     const round = Number(attempts.round);
     let driveObj = {};
@@ -98,7 +104,7 @@ export async function candidateInstructions(
       };
     }
     console.log(driveObj);
-    if (instructions || attempts) {
+    if ((instructions || attempts) && submitted) {
       reply.code(200).send({
         status: true,
         instructions: instructions,
@@ -133,7 +139,9 @@ export async function getQuestion(
       // const shuffledQuestion = await shuffleQuestionOptions(mcq);
       reply.code(200).send({ status: true, questionData: mcq });
     } else {
-      reply.code(404).send({ status: false, message: "No questions available" });
+      reply
+        .code(404)
+        .send({ status: false, message: "No questions available" });
     }
   } catch (error) {
     console.log("Error in getQuestion: ", error);
@@ -151,7 +159,7 @@ export async function timeTakenByCandidate(
     // const setTime = { time: '38:59' }
     console.log(studentId, time);
     if (time) {
-      await redis.set(`${studentId}`, `${time.time}`);
+      await redis.set(`${studentId}`, `${time}`);
       let round = await redis.get(`driveId:${driveId}`);
       let driveObj = {};
       if (round) {
@@ -209,7 +217,7 @@ export async function getCandidateprivileges(
       reply.code(200).send({
         status: true,
         roundPrivileges: roundPrivileges,
-        timeTakenByCandidate: response?.roundOneDurationTaken,
+        timeTakenByCandidate: response,
         roundDetails: roundDetails,
         candidateQuestionSet: candidateQuestionSet,
         lastAttemptedQuestion: lastAttemptedQuestion,
@@ -232,7 +240,10 @@ export async function submitTest(
   try {
     // const queryParams = request.query as QueryParameters;
     const booleanParam = request.params.id.trim() === "true";
-    const { round, driveId } = request.body as { round: Number; driveId: Number };
+    const { round, driveId } = request.body as {
+      round: Number;
+      driveId: Number;
+    };
     const result: any = submitTestDao(
       booleanParam,
       request.user.studentId,
