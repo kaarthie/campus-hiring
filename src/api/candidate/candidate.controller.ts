@@ -86,9 +86,9 @@ export async function candidateInstructions(
     const studentId = request.user.studentId;
     const instructions = await driveInstructions();
     // console.log(instructions);
-    const attempts = await loginAttempts(studentId);
-    console.log(attempts);
+    const attempts: any = await loginAttempts(studentId);
     const submitted = await checkSubmitted(studentId);
+    console.log("Submitted", submitted);
     const loginAttemptsByCandidate = attempts.attempts;
     const round = Number(attempts.round);
     let driveObj = {};
@@ -104,7 +104,8 @@ export async function candidateInstructions(
       };
     }
     console.log(driveObj);
-    if ((instructions || attempts) && submitted) {
+
+    if (attempts.length && !submitted) {
       reply.code(200).send({
         status: true,
         instructions: instructions,
