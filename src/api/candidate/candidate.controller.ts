@@ -105,18 +105,28 @@ export async function candidateInstructions(
     }
     console.log(driveObj);
 
-    if (attempts.length && !submitted) {
-      reply.code(200).send({
-        status: true,
-        instructions: instructions,
-        attempt: loginAttemptsByCandidate,
-        driveStatus: driveObj?.driveStatus,
-        totalAttendedQuestions: 0,
-      });
+    const attemptBool = attempts ? true : false;
+    const notSubmittedBool = submitted ? false : true;
+
+    if (notSubmittedBool) {
+      if (attemptBool) {
+        reply.code(200).send({
+          status: true,
+          instructions: instructions,
+          attempt: loginAttemptsByCandidate,
+          driveStatus: driveObj?.driveStatus,
+          totalAttendedQuestions: 0,
+        });
+      } else {
+        reply.code(401).send({
+          status: false,
+          message: "Couldn't fetch instruction and Attempts",
+        });
+      }
     } else {
-      reply.code(401).send({
+      reply.code(500).send({
         status: false,
-        message: "Couldn't fetch instruction and Attempts",
+        message: "You've already submitted the test!",
       });
     }
   } catch (error) {

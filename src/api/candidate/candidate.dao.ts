@@ -115,12 +115,18 @@ export async function loginAttempts(studentId) {
 
 export async function checkSubmitted(studentId) {
   try {
+    const drive = await prisma.drive.findFirst({
+      where: {
+        driveStatus: "pending",
+      },
+    });
     const response: any = await prisma.submitTest.findFirst({
       where: {
         candidateId: studentId,
+        driveId: drive?.driveId,
       },
     });
-    return response?.length > 0;
+    return response;
   } catch (error) {
     console.log("Error in checkSubmitted() ->", error);
   }
