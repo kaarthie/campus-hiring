@@ -33,6 +33,22 @@ export async function getDriveDetails() {
   }
 }
 
+export async function getDrive() {
+  try {
+    const driveData = await prisma.drive.findMany({
+      where: {
+        driveStatus: "upcoming",
+      },
+    });
+    const driveIds = driveData.map((data) => {
+      return data.driveId;
+    });
+    return driveIds;
+  } catch (error) {
+    console.log("Error in getDrive() ->", error);
+  }
+}
+
 export async function drivefeedback(
   labFacilitiesRating,
   hospitalityRating,
@@ -119,7 +135,7 @@ export async function createNewDrive(
               roundDuration: Number(duration),
               roundTotalQuestions: Number(totalQuestions),
               roundStatus: "notStarted",
-              roundTestConfig : questionData
+              roundTestConfig: questionData,
             },
           },
         },
@@ -141,7 +157,10 @@ export async function createNewDrive(
         },
       });
     }
-    console.log("Recruitment Members  --->>>  ", JSON.stringify(recruitmentMembers));
+    console.log(
+      "Recruitment Members  --->>>  ",
+      JSON.stringify(recruitmentMembers)
+    );
     return { result };
   } catch (error) {
     console.log("Error in createNewDrive:", error);

@@ -1,4 +1,3 @@
-
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import {
   getDriveDetails,
@@ -9,7 +8,8 @@ import {
   campusYears,
   updateDriveStatus,
   updateRoundStatus,
-  updateDriveStatusCompleted
+  updateDriveStatusCompleted,
+  getDrive,
 } from "./drive.dao";
 import {
   campusParams,
@@ -18,7 +18,10 @@ import {
   newDrive,
   startRound,
 } from "./drive.interface";
-import { generateQuestion, getQuestionDetails } from "../questionGeneration/questionSet.dao";
+import {
+  generateQuestion,
+  getQuestionDetails,
+} from "../questionGeneration/questionSet.dao";
 import redis from "../../../config/redis";
 import { resultDao } from "../candidateResults/result.dao";
 import { uploadCandidate } from "../../../services/candidateGeneration";
@@ -32,10 +35,35 @@ export async function getDetails(request: FastifyRequest, reply: FastifyReply) {
     } else {
       reply
         .code(403)
-        .send({ status: false, message: "error in fetching the drive details" });
+        .send({
+          status: false,
+          message: "error in fetching the drive details",
+        });
     }
   } catch (error) {
     console.log("Error in getDetails: ", error);
+    reply.code(500).send({ status: false, message: error.message });
+  }
+}
+
+export async function getUpcomingDrive(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const response = await getDrive();
+    if (response) {
+      reply.code(200).send({ status: true, data: response });
+    } else {
+      reply
+        .code(403)
+        .send({
+          status: false,
+          message: "error in fetching the drive details",
+        });
+    }
+  } catch (error) {
+    console.log("Error in getUpcomingDrive: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }
@@ -66,7 +94,10 @@ export async function addFeedback(
     } else {
       reply
         .code(403)
-        .send({ status: false, message: "error in adding the feedback details" });
+        .send({
+          status: false,
+          message: "error in adding the feedback details",
+        });
     }
   } catch (error) {
     console.log("Error in addFeedback: ", error);
@@ -103,9 +134,8 @@ export async function addDrive(request: any, reply: FastifyReply) {
     // Iterate over each field in the form-data
     for await (const part of request.parts()) {
       if (part.file) {
-        excelExists = true
+        excelExists = true;
         fileData = await collectStream(part.file);
-
       } else {
         // If the part is a field, store its value
         data[part.fieldname] = part.value;
@@ -122,24 +152,33 @@ export async function addDrive(request: any, reply: FastifyReply) {
       duration,
       roundName,
       skip,
-      questionData
+      questionData,
     }: any = data;
 
-    const roundData: any = JSON.parse(questionData)
+    const roundData: any = JSON.parse(questionData);
 
-    const total: any = Object.values(roundData).reduce((acc: any, level: any) => {
-      return acc + Object.values(level).reduce((acc: any, cnt) => acc + cnt, 0);
-    }, 0);
+    const total: any = Object.values(roundData).reduce(
+      (acc: any, level: any) => {
+        return (
+          acc + Object.values(level).reduce((acc: any, cnt) => acc + cnt, 0)
+        );
+      },
+      0
+    );
     console.log(total, totalQuestions);
     const diff = total - totalQuestions;
     if (diff !== 0) {
-      throw new Error(`Selected number of questions does not match Total No Questions. Please ${diff > 0 ? "reduce" : "add"} ${Math.abs(diff)} questions.`);
+      throw new Error(
+        `Selected number of questions does not match Total No Questions. Please ${
+          diff > 0 ? "reduce" : "add"
+        } ${Math.abs(diff)} questions.`
+      );
     }
     console.log(driveDate);
     const ConvertedDriveDate = new Date(`${driveDate}`);
     console.log(ConvertedDriveDate);
-    let team: number | number[] = recruitmentTeam.split(',').map(Number);
-    let job: string | string[] = jobRoles.split(',');
+    let team: number | number[] = recruitmentTeam.split(",").map(Number);
+    let job: string | string[] = jobRoles.split(",");
 
     // console.log(
     //   "From Create Drive Route",
@@ -171,7 +210,7 @@ export async function addDrive(request: any, reply: FastifyReply) {
       const excelData = await uploadCandidate(fileData);
       console.log(excelData);
     } else {
-      throw new Error("Upload Students Data")
+      throw new Error("Upload Students Data");
     }
     reply.code(200).send({ status: true, message: "Drive Created" });
   } catch (error) {
@@ -275,4 +314,3 @@ export async function stopDrive(request: FastifyRequest, reply: FastifyReply) {
     reply.code(500).send({ status: false, message: error.message });
   }
 }
-
