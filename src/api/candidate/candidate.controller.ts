@@ -222,7 +222,7 @@ export async function getCandidateprivileges(
     const studentId = request.user.studentId;
     const candidateQuestionSet = await getcandidateQuestionSet(studentId);
     const response = await trackCandidateDao(startTime, studentId);
-    // console.log(response);
+    console.log(response,"FIND");
     const lastAttemptedQuestion = await lastAnsweredQuestion(studentId);
     if (roundPrivileges || roundDetails || candidateQuestionSet || response) {
       reply.code(200).send({

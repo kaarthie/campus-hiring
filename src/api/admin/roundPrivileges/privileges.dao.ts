@@ -76,83 +76,89 @@ export async function getPrivilegeDao() {
 
 export async function trackCandidateDao(startTime, studentId) {
   try {
-    // let drive = await prisma.drive.findFirst({
-    //   where: {
-    //     driveStatus: "pending",
-    //   },
-    // });
-    // const driveId = drive?.driveId;
-    // // let round = await redis.get(`driveId:${driveId}`);
-    // let round = 1;
+    console.log("ENTERED");
+    let timeData;
+    let drive = await prisma.drive.findFirst({
+      where: {
+        driveStatus: "pending",
+      },
+    });
+    const driveId = drive?.driveId;
+    // let round = await redis.get(`driveId:${driveId}`);
+    let round = 1;
 
-    // const existingCandidate = await prisma.drive.findFirst({
-    //   where: {
-    //     driveStatus: "pending",
-    //   },
-    //   include: {
-    //     CandidateTracking: {
-    //       where: {
-    //         studentId: studentId,
-    //         round: Number(round),
-    //       },
-    //     },
-    //     Rounds: {
-    //       where: {
-    //         round: Number(round), // try to get from redis after start test clicked for respective Round
-    //       },
-    //       select: {
-    //         roundDuration: true,
-    //       },
-    //     },
-    //   },
-    // });
-    // console.log(existingCandidate,true)
-    // // console.log("existingCandidate----------->", existingCandidate);
-    // if (existingCandidate?.CandidateTracking.length) {
-    //   const driveId = drive?.driveId;
-    //   let round = await redis.get(`driveId:${driveId}`);
-    //   const updateCandidate = await prisma.candidateTracking.update({
-    //     where: {
-    //       driveId_studentId_round: {
-    //         studentId: existingCandidate.CandidateTracking[0].studentId,
-    //         driveId: existingCandidate.CandidateTracking[0].driveId,
-    //         round: Number(round),
-    //       },
-    //     },
-    //     data: {
-    //       loginAttempts:
-    //         Number(existingCandidate.CandidateTracking[0]?.loginAttempts) + 1, // updaing the login attempts () Number(existingCandidate?.loginAttempts) + 1)
-    //     },
-    //   });
-    //   // console.log("update ---------->", updateCandidate);
-    //   return updateCandidate;
-    // } else {
-    //   // console.log(existingCandidate?.driveId, studentId, startTime);
-    //   const driveId = drive?.driveId;
-    //   let round = await redis.get(`driveId:${driveId}`);
-    //   const roundDuration = await prisma.rounds.findFirst({
-    //     where: {
-    //       driveId: driveId,
-    //     },
-    //     select: {
-    //       roundDuration: true,
-    //     },
-    //   });
+    const existingCandidate = await prisma.drive.findFirst({
+      where: {
+        driveStatus: "pending",
+      },
+      include: {
+        CandidateTracking: {
+          where: {
+            studentId: studentId,
+            round: Number(round),
+          },
+        },
+        Rounds: {
+          where: {
+            round: Number(round), // try to get from redis after start test clicked for respective Round
+          },
+          select: {
+            roundDuration: true,
+          },
+        },
+      },
+    });
+    console.log(existingCandidate, true);
+    let createCandidate;
+    // console.log("existingCandidate----------->", existingCandidate);
+    if (existingCandidate?.CandidateTracking.length) {
+      const driveId = drive?.driveId;
+      let round = await redis.get(`driveId:${driveId}`);
+      createCandidate = await prisma.candidateTracking.update({
+        where: {
+          driveId_studentId_round: {
+            studentId: existingCandidate.CandidateTracking[0].studentId,
+            driveId: existingCandidate.CandidateTracking[0].driveId,
+            round: Number(round),
+          },
+        },
+        data: {
+          loginAttempts:
+            Number(existingCandidate.CandidateTracking[0]?.loginAttempts) + 1, // updaing the login attempts () Number(existingCandidate?.loginAttempts) + 1)
+        },
+      });
+      // console.log("update ---------->", updateCandidate);
+    } else {
+      // console.log(existingCandidate?.driveId, studentId, startTime);
+      const driveId = drive?.driveId;
+      let round = await redis.get(`driveId:${driveId}`);
+      const roundDuration = await prisma.rounds.findFirst({
+        where: {
+          driveId: driveId,
+        },
+        select: {
+          roundDuration: true,
+        },
+      });
 
-    //   const createCandidate = await prisma.candidateTracking.create({
-    //     data: {
-    //       driveId: Number(drive?.driveId),
-    //       studentId: studentId,
-    //       startTime: startTime,
-    //       loginAttempts: 1,
-    //       round: Number(round),
-    //       roundOneDurationTaken: String(`${roundDuration?.roundDuration}:00`),
-    //       // roundOneDurationTaken: String(`${existingCandidate?.Rounds[Number(round) - 1].roundDuration}:00`)
-    //     },
-    //   });
-    //   // console.log("create", createCandidate);
+      createCandidate = await prisma.candidateTracking.create({
+        data: {
+          driveId: Number(drive?.driveId),
+          studentId: studentId,
+          startTime: startTime,
+          loginAttempts: 1,
+          round: Number(round),
+          roundOneDurationTaken: String(`${roundDuration?.roundDuration}:00`),
+          // roundOneDurationTaken: String(`${existingCandidate?.Rounds[Number(round) - 1].roundDuration}:00`)
+        },
+      });
+      // console.log("create", createCandidate);
+    }
 
-    const timeData = await redis.get(`${studentId}`);
+    const timeTaken = await redis.get(`${studentId}`);
+    timeData = timeTaken ? timeTaken : createCandidate?.roundOneDurationTaken;
+    console.log(timeTaken,"TIMETAKEN");
+    console.log(timeData,false,"CHECK");
     return timeData;
   } catch (error) {
     console.log("Error in trackCandidateDao:", error);
