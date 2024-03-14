@@ -9,7 +9,7 @@ datasource db {
 
 model Campus {
   id         Int     @id @unique
-  campusYear String @unique
+  campusYear String  @unique
   drive      Drive[]
 
   @@map("campus_details")
@@ -35,6 +35,7 @@ model Drive {
   Results                 Results[]
   submitTest              submitTest[]
   jobRoles                jobRoles[]
+
   @@map("drive_details")
 }
 
@@ -57,7 +58,7 @@ model CandidateTracking {
   drive                 Drive                   @relation(fields: [driveId], references: [driveId])
   student               CandidateDetailsCollege @relation(fields: [studentId], references: [studentId])
 
-  @@id([driveId, studentId,round])
+  @@id([driveId, studentId, round])
   @@map("candidate_tracking")
 }
 
@@ -90,23 +91,30 @@ model Answers {
   question    Mcqs    @relation(fields: [questionId], references: [id])
 }
 
+model tabSwitch {
+  id          Int @id @unique @default(autoincrement())
+  tabCount    Int @default(0)
+  candidateId Int @unique
+}
+
 model RecruitmentTeamMembers {
-  id     Int    @id @default(autoincrement())
-  name String
-  email String
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String
   position String
+
   @@map("recruitment_team_members")
 }
 
 model RoundPrivileges {
-  id Int @id @unique  @default(autoincrement())
-  driveId Int 
-  IsSkipped        Boolean?
-  round            Int?
+  id        Int      @id @unique @default(autoincrement())
+  driveId   Int
+  IsSkipped Boolean?
+  round     Int?
   // IsPrev           Boolean?
   // IsNext            
   // SubmitOnAnswered Boolean?
-  drive            Drive    @relation(fields: [driveId], references: [driveId])
+  drive     Drive    @relation(fields: [driveId], references: [driveId])
 
   @@map("round_privileges")
 }
@@ -139,8 +147,8 @@ model CandidateDetailsCollege {
   drive                Drive                  @relation(fields: [driveId], references: [driveId])
   CandidateTracking    CandidateTracking[]
   candidateQuestionSet candidateQuestionSet[]
-  Results       Results[]
-  submitTest   submitTest[]
+  Results              Results[]
+  submitTest           submitTest[]
 
   @@id([driveId, studentId])
   @@map("candidate_details_college")
@@ -152,7 +160,7 @@ model candidateQuestionSet {
   driveId    Int
   studentId  Int
   questionId Int
-  round       Int
+  round      Int
   drive      Drive                   @relation(fields: [driveId], references: [driveId])
   question   Mcqs                    @relation(fields: [questionId], references: [id])
   student    CandidateDetailsCollege @relation(fields: [studentId], references: [studentId])
@@ -163,11 +171,11 @@ model candidateQuestionSet {
 model questionSet {
   driveId    Int
   questionId Int
-  round       Int
-  drive      Drive   @relation(fields: [driveId], references: [driveId])
-  question   Mcqs    @relation(fields: [questionId], references: [id])
+  round      Int
+  drive      Drive @relation(fields: [driveId], references: [driveId])
+  question   Mcqs  @relation(fields: [questionId], references: [id])
 
-  @@id([driveId, questionId,round])
+  @@id([driveId, questionId, round])
 }
 
 model Instructions {
@@ -178,18 +186,18 @@ model Instructions {
 }
 
 model submitTest {
-  driveId              Int    
-  candidateId          Int
-  round                Int
-  submitted            Boolean @default(false)
-  student              CandidateDetailsCollege @relation(fields: [candidateId], references: [studentId])
-  drive                Drive   @relation(fields: [driveId], references: [driveId])
-  @@id([driveId,candidateId,round])
+  driveId     Int
+  candidateId Int
+  round       Int
+  submitted   Boolean                 @default(false)
+  student     CandidateDetailsCollege @relation(fields: [candidateId], references: [studentId])
+  drive       Drive                   @relation(fields: [driveId], references: [driveId])
 
+  @@id([driveId, candidateId, round])
 }
 
 model Rounds {
-  driveId              Int     
+  driveId             Int
   round               Int
   roundName           String?
   roundDuration       Int
@@ -198,57 +206,64 @@ model Rounds {
   roundTopics         String?
   roundTestConfig     String?
   roundStatus         String?
-  drive                Drive   @relation(fields: [driveId], references: [driveId])
-  results               Results[]
+  drive               Drive     @relation(fields: [driveId], references: [driveId])
+  results             Results[]
 
-  @@id ([driveId,round])
-  @@map("round_details")
+  @@id([driveId, round])
   @@index([round, driveId])
+  @@map("round_details")
 }
 
 model Results {
-  driveId              Int     
-  candidateId          Int
-  round                Int
-  score                Int      @default(0)
-  drive                Drive   @relation(fields: [driveId], references: [driveId])
-  student    CandidateDetailsCollege @relation(fields: [candidateId], references: [studentId])
-  rounds                Rounds @relation(fields: [round,driveId],references: [round,driveId])
+  driveId        Int
+  candidateId    Int
+  round          Int
+  score          Int                     @default(0)
+  ds             Int                     @default(0)
+  logical        Int                     @default(0)
+  sql            Int                     @default(0)
+  tabSwitchCount Int                     @default(0)
+  drive          Drive                   @relation(fields: [driveId], references: [driveId])
+  student        CandidateDetailsCollege @relation(fields: [candidateId], references: [studentId])
+  rounds         Rounds                  @relation(fields: [round, driveId], references: [round, driveId])
 
-  @@id([driveId,candidateId,round])
+  @@id([driveId, candidateId, round])
 }
 
 model adminCredentials {
-  id                  Int @id @default(autoincrement())
-  email               String
+  id    Int    @id @default(autoincrement())
+  email String
 
   @@map("admin_details")
 }
 
 model feedBack {
-  driveId              Int     @id
-  labFacilityRating    Int
-  hospitalityRating    Int
-  internetBandwidthRating    Int
-  studentAbility    Int
-  overallFeedBack             String?
-  drive                Drive   @relation(fields: [driveId], references: [driveId])
+  driveId                 Int     @id
+  labFacilityRating       Int
+  hospitalityRating       Int
+  internetBandwidthRating Int
+  studentAbility          Int
+  overallFeedBack         String?
+  drive                   Drive   @relation(fields: [driveId], references: [driveId])
+
   @@map("feedback")
 }
 
-model jobRoles{
-  id Int @id @unique  @default(autoincrement())
-  driveId Int 
+model jobRoles {
+  id      Int    @id @unique @default(autoincrement())
+  driveId Int
   jobRole String
-  drive                Drive   @relation(fields: [driveId], references: [driveId])
+  drive   Drive  @relation(fields: [driveId], references: [driveId])
+
   @@map("job_roles")
 }
 
 model RecruitmentTeam {
-  id Int @id @unique  @default(autoincrement())
-  driveId Int 
+  id          Int    @id @unique @default(autoincrement())
+  driveId     Int
   teamMembers String
-  position String
+  position    String
   drive       Drive  @relation(fields: [driveId], references: [driveId])
+
   @@map("recruitment_team")
 }
