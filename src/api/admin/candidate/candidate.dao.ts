@@ -1,4 +1,5 @@
 import prisma from "../../../utils/prisma";
+import { ICandidateDetailsCollege } from "./candidate.interface";
 
 export async function createCandidate({
   driveId,
@@ -24,7 +25,7 @@ export async function createCandidate({
   mobileNumber,
   email,
   address,
-}) {
+} ) {
   try {
     const response = await prisma.candidateDetailsCollege.create({
       data: {
@@ -36,8 +37,12 @@ export async function createCandidate({
         branch: branch,
         dateOfBirth: dateOfBirth,
         gender: gender,
-        tenthPercentage: parseInt(tenthPercentage as string),
-        tenthYOP: parseInt(tenthYOP as string),
+        tenthPercentage: isNaN(parseInt(tenthPercentage as string))
+          ? null
+          : parseInt(tenthPercentage as string),
+        tenthYOP: isNaN(parseInt(tenthYOP as string))
+          ? null
+          : parseInt(tenthYOP as string),
         twelthPercentage: isNaN(parseInt(twelthPercentage as string))
           ? null
           : parseInt(twelthPercentage as string),

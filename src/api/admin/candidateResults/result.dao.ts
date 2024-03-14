@@ -233,7 +233,7 @@ export async function resultsWithScores(driveId, id) {
         score: "desc",
       },
       where: {
-        driveId: driveId.driveId,
+        driveId: driveId,
       },
     } as any);
     const candidateIdsByScore = await Promise.all(

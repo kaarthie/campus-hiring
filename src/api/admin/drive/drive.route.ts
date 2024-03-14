@@ -11,8 +11,9 @@ import {
   getCampusYears,
   startDrive,
   stopDrive,
-  uploadDatabase,
   getUpcomingDrive,
+  updateDriveHandler,
+  getDriveByIdHandler,
 } from "./drive.controller";
 
 const driveRoutes: IRouteOptions<{
@@ -74,6 +75,18 @@ const driveRoutes: IRouteOptions<{
     preHandler: [jwtAdminVerification],
     method: API_METHODS.PUT,
   },
+  {
+    url: "/editDrive/:id",
+    handler: updateDriveHandler,
+    preHandler: [jwtAdminVerification],
+    method: API_METHODS.PUT,
+  },
+  {
+    url: "/getDrive/:id",
+    handler: getDriveByIdHandler,
+    preHandler: [jwtAdminVerification],
+    method: API_METHODS.GET,
+  }
 ];
 
 export default driveRoutes;

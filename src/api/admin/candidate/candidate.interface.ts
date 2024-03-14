@@ -6,8 +6,8 @@ export interface ICandidateDetailsCollege {
   branch: string;
   dateOfBirth: string;
   gender: string;
-  tenthPercentage: number;
-  tenthYOP: number;
+  tenthPercentage?: number | null;
+  tenthYOP?: number | null;
   twelthPercentage?: number | null;
   twelthYOP?: number | null;
   diplomaPercentage?: number | null;

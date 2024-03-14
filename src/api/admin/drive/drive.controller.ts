@@ -10,6 +10,8 @@ import {
   updateRoundStatus,
   updateDriveStatusCompleted,
   getDrive,
+  updateDrive,
+  getDriveById,
 } from "./drive.dao";
 import {
   campusParams,
@@ -154,7 +156,7 @@ export async function addDrive(request: any, reply: FastifyReply) {
       skip,
       questionData,
     }: any = data;
-
+    console.log("Drive Data ----->>>>>> ", data);
     const roundData: any = JSON.parse(questionData);
 
     const total: any = Object.values(roundData).reduce(
@@ -313,4 +315,88 @@ export async function stopDrive(request: FastifyRequest, reply: FastifyReply) {
     console.log("Error in stopDrive: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
+}
+
+export async function updateDriveHandler(request: any, reply: FastifyReply) {
+  try {
+    const driveId = request.params.id // Assuming you have a parameter for identifying the drive to update
+    const data: any = {}; // Initialize data object to store form data
+
+    let excelExists = false;
+    let fileData;
+
+    // Iterate over each field in the form-data
+    for await (const part of request.parts()) {
+      if (part.file) {
+        excelExists = true;
+        fileData = await collectStream(part.file);
+      } else {
+        // If the part is a field, store its value
+        data[part.fieldname] = part.value;
+      }
+    }
+
+    // Assuming your form data contains fields similar to addDrive function
+    const { hiringYear, totalQuestions, driveDate, collegeName, recruitmentTeam, jobRoles, duration, roundName, skip, questionData }: any = data;
+
+    // Your validation and processing logic here...
+
+    // Call the update drive function with necessary parameters
+    const response = await updateDrive(+driveId, hiringYear[0], driveDate, collegeName, recruitmentTeam, jobRoles, duration, roundName, skip, totalQuestions, questionData);
+
+    // Handle uploading excel file if it exists
+    if (excelExists) {
+      const excelData = await uploadCandidate(fileData);
+      console.log(excelData);
+    }
+
+    // Send success response
+    reply.code(200).send({ status: true, message: "Drive Updated" , data : response});
+  } catch (error) {
+    console.log("Error in updateDriveHandler: ", error);
+    reply.code(500).send({ status: false, message: error.message });
+  }
+}
+
+export async function getDriveByIdHandler(request: any, reply: FastifyReply) {
+  try {
+    const driveId = request.params.id // 
+    // Call the controller function to get the drive information by ID
+    const drive = await getDriveById(+driveId);
+
+    // Send the retrieved drive information as a response
+    console.log(drive);
+    reply.code(200).send({ status: true, data: transformResponse(drive) });
+  } catch (error) {
+    console.log("Error in getDriveByIdHandler: ", error);
+    reply.code(500).send({ status: false, message: error.message });
+  }
+}
+
+function transformResponse(responseBody) {
+  const {
+    campusId,
+    college: { college: collegeName },
+    driveDate,
+    jobRoles,
+    Rounds,
+    RoundPrivileges,
+    RecruitmentTeam
+  } = responseBody;
+
+  const driveData = {
+    hiringYear: campusId, // Using campusId as hiringYear
+    collegeName,
+    driveDate: new Date(driveDate).toISOString().split('T')[0], // Formatting driveDate to 'YYYY-MM-DD'
+    jobRoles: jobRoles.map(role => role.jobRole).join(', '), // Concatenating job roles
+    roundName: Rounds[0].roundName, // Assuming there's only one round
+    duration: Rounds[0].roundDuration,
+    totalQuestions: Rounds[0].roundTotalQuestions,
+    skip: RoundPrivileges[0].IsSkipped ? 'Yes' : 'No', // Assuming there's only one round and privilege
+    questionTopics: Rounds[0].roundTopics || null,
+    recruitmentTeam: RecruitmentTeam,
+    questionData: Rounds[0].roundTestConfig
+  };
+
+  return { "driveData": driveData };
 }

@@ -100,6 +100,7 @@ export async function createNewDrive(
   questionData
 ) {
   try {
+    skip = skip === "No" ? false : true
     const result = await prisma.$transaction([
       prisma.drive.create({
         data: {
@@ -126,7 +127,7 @@ export async function createNewDrive(
             })),
           },
           RoundPrivileges: {
-            create: { IsSkipped: Boolean(skip[0]), round: 1 },
+            create: { IsSkipped: skip, round: 1 },
           },
           Rounds: {
             create: {
@@ -323,3 +324,96 @@ export async function updateDriveStatusCompleted(driveId, roundId) {
     console.log("Error in updateDriveStatusCompleted:", error);
   }
 }
+
+export async function getDriveById(driveId) {
+  try {
+    console.log("------------->>>>>>>>>", driveId);
+    const drive = await prisma.drive.findUnique({
+      where: {
+        driveId: driveId,
+      },
+      include: {
+        college: true,
+        jobRoles: true,
+        RoundPrivileges: true,
+        Rounds: true,
+        RecruitmentTeam: true,
+      },
+    });
+
+    return drive;
+  } catch (error) {
+    console.log("Error in getDriveById:", error);
+  }
+}
+
+export async function updateDrive(
+  driveId,
+  campusId,
+  ConvertedDriveDate,
+  collegeName,
+  recruitmentTeam,
+  job,
+  duration,
+  roundName,
+  skip,
+  totalQuestions,
+  questionData
+) {
+  try {
+    // Update the drive
+    const updatedDrive = await prisma.drive.update({
+      where: { driveId },
+      data: {
+        campusId: Number(campusId),
+        driveDate: ConvertedDriveDate,
+        college: {
+          upsert: {
+            update: {},
+            create: {
+              college: collegeName,
+            },
+          },
+        },
+        jobRoles: {
+          deleteMany: {}, // Delete existing job roles before creating new ones
+          create: job.map((role) => ({
+            jobRole: role,
+          })),
+        },
+        Rounds: {
+          deleteMany: {}, // Delete existing rounds before creating new ones
+          create: {
+            round: 1,
+            roundName: roundName,
+            roundDuration: Number(duration),
+            roundTotalQuestions: Number(totalQuestions),
+            roundStatus: "notStarted",
+            roundTestConfig: questionData,
+          },
+        },
+      },
+    });
+
+    // Update or create recruitment team members
+    let recruitmentMembers = await prisma.recruitmentTeamMembers.findMany({
+      where: {
+        id: { in: recruitmentTeam },
+      },
+    });
+    for (let members of recruitmentMembers) {
+      await prisma.recruitmentTeam.create({
+        data: {
+          teamMembers: members.name,
+          position: members.position,
+          driveId: driveId,
+        },
+      });
+    }
+
+    return updatedDrive;
+  } catch (error) {
+    console.log("Error in updateDrive:", error);
+  }
+}
+
