@@ -34,7 +34,9 @@ export async function resultDeletion(
         .code(200)
         .send({ status: true, message: "Results deleted", result: result });
     } else {
-      reply.code(404).send({ status: false, message: "couldn't Delete results" });
+      reply
+        .code(404)
+        .send({ status: false, message: "couldn't Delete results" });
     }
   } catch (error) {
     console.log("Error in resultDeletion: ", error);
@@ -66,10 +68,9 @@ export async function driveResult(
   reply: FastifyReply
 ) {
   try {
-    // const results = await resultDao();
     const driveId = Number(request.params.id);
-    const report = await driveResults(driveId);
-    // console.log(report)
+    const { score, ds, sql, logical }: any = request.query;
+    const report = await driveResults(driveId, score, ds, sql, logical);
     if (report) {
       reply.code(200).send({
         status: true,
@@ -102,6 +103,6 @@ export async function filteredResult(
     reply.status(200).send(Results);
   } catch (error) {
     console.log("Error in filteredResult: ", error);
-    reply.code(500).send({message: error.message });
+    reply.code(500).send({ message: error.message });
   }
 }

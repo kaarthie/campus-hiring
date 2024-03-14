@@ -293,7 +293,7 @@ export async function stopDrive(request: FastifyRequest, reply: FastifyReply) {
     // let roundId = await redis.get(`driveId:${driveId}`);
     let round = 1;
     const results: any = await resultDao(round);
-    // console.log(results);
+// console.log(results);
     let response = await redis.del(`driveId:${driveId}`);
     const status = "completed";
     let roundStatus = await updateRoundStatus(driveId, round, status);

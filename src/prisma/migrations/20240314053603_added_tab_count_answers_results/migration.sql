@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `Answers` ADD COLUMN `tabCount` INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE `Results` ADD COLUMN `tabSwitchCount` INTEGER NOT NULL DEFAULT 0;

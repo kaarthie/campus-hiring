@@ -38,6 +38,7 @@ export async function resultDao(roundId) {
       select: {
         id: true,
         answer: true,
+        topic: true,
       },
     });
 
@@ -51,7 +52,8 @@ export async function resultDao(roundId) {
             candidateId: true,
             answer: true,
             questionId: true,
-            roundId: true, // fetching candidate responses
+            roundId: true,
+            answerId: true,
           },
           where: {
             roundId: Number(roundId),
@@ -78,10 +80,11 @@ export async function resultDao(roundId) {
     );
 
     const resultsToCreate: any = [];
-
     for (const candidateId in groupedResponses) {
       const candidateAnswers = groupedResponses[candidateId];
-      let score = 0;
+      const scores: any = {
+        overall: 0,
+      };
 
       for (const response of candidateAnswers) {
         const questionId = response.questionId;
@@ -90,17 +93,29 @@ export async function resultDao(roundId) {
           (ans) => ans.id === questionId
         );
 
-        if (correctAnswer && correctAnswer.answer === answer) {
-          score++;
-        }
-      }
-      console.log(candidateAnswers);
+        if (correctAnswer) {
+          const topic: any = correctAnswer.topic;
 
+          if (!scores[topic]) {
+            scores[topic] = 0;
+          }
+
+          if (correctAnswer.answer === answer) {
+            scores[topic]++;
+            scores["overall"]++;
+          }
+        }
+        console.log(response, "CHECK");
+      }
       resultsToCreate.push({
         driveId: questions.driveId,
         candidateId: parseInt(candidateId),
         round: candidateAnswers[0].roundId,
-        score: score,
+        score: scores.overall,
+        tabSwitchCount: 0,
+        ds: scores?.ds || 0,
+        logical: scores?.logical || 0,
+        sql: scores?.sql || 0,
       });
     }
 
@@ -115,7 +130,6 @@ export async function resultDao(roundId) {
     console.error("Error in resultDao:", error);
   }
 }
-
 
 export async function resultDeletionDao(id) {
   try {
@@ -161,12 +175,26 @@ export async function getDrives() {
   }
 }
 
-export async function driveResults(driveId) {
+export async function driveResults(driveId, score, ds, sql, logical) {
   try {
+    let whereCondition: any = {};
+    whereCondition.driveId = Number(driveId);
+
+    if (score) {
+      whereCondition.score = { gte: Number(score) };
+    }
+    if (ds) {
+      whereCondition.ds = { gte: Number(ds) };
+    }
+    if (sql) {
+      whereCondition.sql = { gte: Number(sql) };
+    }
+    if (logical) {
+      whereCondition.logical = { gte: Number(logical) };
+    }
+
     const results = await prisma.results.findMany({
-      where: {
-        driveId: Number(driveId),
-      },
+      where: whereCondition,
       include: {
         student: {
           select: {
@@ -186,7 +214,6 @@ export async function driveResults(driveId) {
         score: "desc",
       },
     });
-    // console.log(results);
 
     const notStartedTestCount = await prisma.candidateDetailsCollege.count({
       where: {
@@ -233,7 +260,7 @@ export async function resultsWithScores(driveId, id) {
         score: "desc",
       },
       where: {
-        driveId: driveId.driveId,
+        driveId: driveId,
       },
     } as any);
     const candidateIdsByScore = await Promise.all(
@@ -247,7 +274,7 @@ export async function resultsWithScores(driveId, id) {
             candidateId: true,
           },
         });
-  
+
         return {
           score: result.score,
           student_count: result._count,
@@ -256,11 +283,11 @@ export async function resultsWithScores(driveId, id) {
       })
     );
     console.log(id);
-  
+
     const candidateIds = candidateIdsByScore.flatMap((entry) =>
       entry.candidates.map((candidate) => candidate.candidateId)
     );
-  
+
     // Fetch student details from another table
     const students = await prisma.candidateDetailsCollege.findMany({
       where: {
@@ -280,7 +307,7 @@ export async function resultsWithScores(driveId, id) {
         mobileNumber: true,
       },
     });
-  
+
     // Map student details into candidate objects
     const combinedData = candidateIdsByScore.map((entry) => {
       const candidatesWithStudents = entry.candidates.map((candidate) => {
@@ -292,14 +319,14 @@ export async function resultsWithScores(driveId, id) {
           ...student,
         };
       });
-  
+
       return {
         ...entry,
         candidates: candidatesWithStudents,
       };
     });
     console.log("Combined Results " + JSON.stringify(combinedData));
-  
+
     if (!id) {
       return combinedData;
     } else {
