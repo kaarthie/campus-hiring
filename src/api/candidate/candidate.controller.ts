@@ -10,6 +10,7 @@ import {
   getcandidateQuestionSet,
   storeCandidateTime,
   checkSubmitted,
+  createTabCount,
 } from "./candidate.dao";
 import redis from "../../config/redis";
 import {
@@ -222,11 +223,21 @@ export async function getCandidateprivileges(
     const studentId = request.user.studentId;
     const candidateQuestionSet = await getcandidateQuestionSet(studentId);
     const response = await trackCandidateDao(startTime, studentId);
-    console.log(response,"FIND");
+    console.log(response, "FIND");
     const lastAttemptedQuestion = await lastAnsweredQuestion(studentId);
     if (roundPrivileges || roundDetails || candidateQuestionSet || response) {
+      console.log({
+        status: true,
+        candidateId: studentId,
+        roundPrivileges: roundPrivileges,
+        timeTakenByCandidate: response,
+        roundDetails: roundDetails,
+        candidateQuestionSet: candidateQuestionSet,
+        lastAttemptedQuestion: lastAttemptedQuestion,
+      });
       reply.code(200).send({
         status: true,
+        candidateId: studentId,
         roundPrivileges: roundPrivileges,
         timeTakenByCandidate: response,
         roundDetails: roundDetails,
@@ -271,5 +282,26 @@ export async function submitTest(
   } catch (error) {
     console.log("Error in submitTest: ", error);
     reply.code(500).send({ status: false, message: error.message });
+  }
+}
+export async function addNewTabCount(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const { tabCount, candidateId }: any = request.body;
+    const response = await createTabCount(tabCount, candidateId);
+
+    reply.code(200).send({
+      status: true,
+      message: "Successfully created",
+      data: response,
+    });
+  } catch (error) {
+    console.log("Error in addNewTabCount: ", error);
+    reply.code(500).send({
+      status: false,
+      message: error.message,
+    });
   }
 }

@@ -2,6 +2,7 @@ import prisma from "../../../utils/prisma";
 
 export async function createTabCount(tabCount, candidateId) {
   try {
+    console.log(tabCount,"FIRED");
     const tabSwitch = await prisma.tabSwitch.findFirst({
       where: { candidateId: candidateId },
     });

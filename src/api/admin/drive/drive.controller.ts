@@ -27,7 +27,7 @@ import {
 import redis from "../../../config/redis";
 import { resultDao } from "../candidateResults/result.dao";
 import { uploadCandidate } from "../../../services/candidateGeneration";
-import { collectStream } from "../../../utils/utils";
+import { collectStream, transformDriveResponse } from "../../../utils/utils";
 
 export async function getDetails(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -132,7 +132,6 @@ export async function addDrive(request: any, reply: FastifyReply) {
     const data = {};
     let excelExists = false;
     let fileData;
-    console.log(await getQuestionDetails());
     // Iterate over each field in the form-data
     for await (const part of request.parts()) {
       if (part.file) {
@@ -156,7 +155,7 @@ export async function addDrive(request: any, reply: FastifyReply) {
       skip,
       questionData,
     }: any = data;
-    console.log("Drive Data ----->>>>>> ", data);
+    console.log("Drive Data ", data);
     const roundData: any = JSON.parse(questionData);
 
     const total: any = Object.values(roundData).reduce(
@@ -167,7 +166,7 @@ export async function addDrive(request: any, reply: FastifyReply) {
       },
       0
     );
-    console.log(total, totalQuestions);
+    // Error indication - mismatching of selected number of questions and total questions
     const diff = total - totalQuestions;
     if (diff !== 0) {
       throw new Error(
@@ -176,9 +175,7 @@ export async function addDrive(request: any, reply: FastifyReply) {
         } ${Math.abs(diff)} questions.`
       );
     }
-    console.log(driveDate);
     const ConvertedDriveDate = new Date(`${driveDate}`);
-    console.log(ConvertedDriveDate);
     let team: number | number[] = recruitmentTeam.split(",").map(Number);
     let job: string | string[] = jobRoles.split(",");
 
@@ -338,7 +335,7 @@ export async function updateDriveHandler(request: any, reply: FastifyReply) {
 
     // Assuming your form data contains fields similar to addDrive function
     const { hiringYear, totalQuestions, driveDate, collegeName, recruitmentTeam, jobRoles, duration, roundName, skip, questionData }: any = data;
-
+    console.log("Edit Drive ------>>>>> ", data);
     // Your validation and processing logic here...
 
     // Call the update drive function with necessary parameters
@@ -365,38 +362,9 @@ export async function getDriveByIdHandler(request: any, reply: FastifyReply) {
     const drive = await getDriveById(+driveId);
 
     // Send the retrieved drive information as a response
-    console.log(drive);
-    reply.code(200).send({ status: true, data: transformResponse(drive) });
+    reply.code(200).send({ status: true, data: transformDriveResponse(drive) });
   } catch (error) {
     console.log("Error in getDriveByIdHandler: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
-}
-
-function transformResponse(responseBody) {
-  const {
-    campusId,
-    college: { college: collegeName },
-    driveDate,
-    jobRoles,
-    Rounds,
-    RoundPrivileges,
-    RecruitmentTeam
-  } = responseBody;
-
-  const driveData = {
-    hiringYear: campusId, // Using campusId as hiringYear
-    collegeName,
-    driveDate: new Date(driveDate).toISOString().split('T')[0], // Formatting driveDate to 'YYYY-MM-DD'
-    jobRoles: jobRoles.map(role => role.jobRole).join(', '), // Concatenating job roles
-    roundName: Rounds[0].roundName, // Assuming there's only one round
-    duration: Rounds[0].roundDuration,
-    totalQuestions: Rounds[0].roundTotalQuestions,
-    skip: RoundPrivileges[0].IsSkipped ? 'Yes' : 'No', // Assuming there's only one round and privilege
-    questionTopics: Rounds[0].roundTopics || null,
-    recruitmentTeam: RecruitmentTeam,
-    questionData: Rounds[0].roundTestConfig
-  };
-
-  return { "driveData": driveData };
 }

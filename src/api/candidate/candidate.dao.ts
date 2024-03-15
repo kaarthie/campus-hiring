@@ -141,7 +141,7 @@ export async function driveInstructions() {
       "No cell phones or other secondary devices in the room or test area",
       "Click Start Test to attempt the quiz.",
       "The time will start the moment you click the Start Test button.",
-      "Click on Next button to move next question. Please note that you will not be able to go back to any of the previous question after clicking Next button.",
+      "Click on Next button to move next question.",
       "Click on Submit Test button on completion of the quiz",
       "Should not switch tabs",
     ];
@@ -163,7 +163,7 @@ export async function driveInstructions() {
     if (!privileges?.RoundPrivileges?.IsSkipped) {
       let newInstruction =
         "You cannot be able to skip the questions without answering them.";
-      generalInstructions = [...generalInstructions, newInstruction];
+      generalInstructions = [...generalInstructions, newInstruction, "Please note that you will not be able to go back to any of the previous question after clicking Next button."];
       console.log("General Instructions  " + generalInstructions);
     }
     // if (privileges?.RoundPrivileges?.SubmitOnAnswered) {
@@ -472,5 +472,31 @@ export async function submitTestDao(submitted, studentId, round, driveId) {
     return submitTest ? true : false;
   } catch (error) {
     console.log("Error in submitTestDao: ", error);
+  }
+}
+
+export async function createTabCount(tabCount, candidateId) {
+  try {
+    console.log(tabCount, "FIRED");
+    const tabSwitch = await prisma.tabSwitch.findFirst({
+      where: { candidateId: Number(candidateId) },
+    });
+    let response;
+    if (tabSwitch) {
+      response = await prisma.tabSwitch.update({
+        where: { candidateId: Number(candidateId) },
+        data: { tabCount: { increment: 1 } },
+      });
+    } else {
+      response = await prisma.tabSwitch.create({
+        data: {
+          tabCount: 1,
+          candidateId: Number(candidateId),
+        },
+      });
+    }
+    return response;
+  } catch (error) {
+    console.log("Error in createCandidate:", error);
   }
 }

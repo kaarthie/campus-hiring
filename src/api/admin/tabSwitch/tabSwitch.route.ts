@@ -1,7 +1,7 @@
 import { API_METHODS } from "../../../interface/api.interface";
 import { IRouteOptions } from "../../../interface/fastify.interface";
 import { addNewTabCount } from "./tabSwitch.controller";
-import { jwtAdminVerification } from "../../../preHandlers/preAdminAuth";
+import { jwtVerification } from "../../../preHandlers/preAuth";
 
 const tabSwitchRoutes: IRouteOptions<{
   Params: any;
@@ -11,7 +11,7 @@ const tabSwitchRoutes: IRouteOptions<{
   {
     url: "/addTabCount",
     handler: addNewTabCount,
-    preHandler: [jwtAdminVerification],
+    preHandler: [jwtVerification],
     method: API_METHODS.POST,
   },
 ];

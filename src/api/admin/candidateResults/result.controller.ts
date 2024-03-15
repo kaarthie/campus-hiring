@@ -6,7 +6,7 @@ import {
   driveResults,
   resultsWithScores,
 } from "./result.dao";
-import { generateExcel } from "../../../utils/utils";
+import { generateExcel, generateExcel2 } from "../../../utils/utils";
 interface driveId {
   id: string;
 }
@@ -64,13 +64,16 @@ export async function completedandPendingDrives(
 }
 
 export async function driveResult(
-  request: FastifyRequest<{ Params: driveId }>,
+  request: FastifyRequest<{ Params: driveId, }>,
   reply: FastifyReply
 ) {
   try {
     const driveId = Number(request.params.id);
     const { score, ds, sql, logical }: any = request.query;
     const report = await driveResults(driveId, score, ds, sql, logical);
+
+    // Condition to be altered
+    if(false) await generateExcel2(report, driveId)
     if (report) {
       reply.code(200).send({
         status: true,
@@ -99,7 +102,6 @@ export async function filteredResult(
     const driveId = Number(request.params.driveId);
     const rankId = Number(request.params.id);
     const Results = await resultsWithScores(driveId, rankId);
-    // const generatedFile = await generateExcel();
     reply.status(200).send(Results);
   } catch (error) {
     console.log("Error in filteredResult: ", error);

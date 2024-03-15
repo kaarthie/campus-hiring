@@ -105,7 +105,6 @@ export async function resultDao(roundId) {
             scores["overall"]++;
           }
         }
-        console.log(response, "CHECK");
       }
       resultsToCreate.push({
         driveId: questions.driveId,
@@ -242,6 +241,7 @@ export async function driveResults(driveId, score, ds, sql, logical) {
       loginAttemptsCount: loginAttemptsCount,
       submittedTestCount: submittedTestCount,
       notstarted: notstarted,
+      overallStudentCount: results.length
     };
 
     // console.log(results, loginAttemptsCount, submittedTestCount);

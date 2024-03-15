@@ -16,6 +16,7 @@ import {
   candidateInstructions,
   getQuestion,
   submitTest,
+  addNewTabCount,
 } from "./candidate.controller";
 import { jwtVerification } from "../../preHandlers/preAuth";
 import { uploadCandidate } from "../../services/candidateGeneration";
@@ -69,7 +70,7 @@ const candidateRoutes: IRouteOptions<{
   {
     url: "/getCandidateprivileges",
     preHandler: [jwtVerification],
-    schema: candidatePrivilegesSchema,
+    // schema: candidatePrivilegesSchema,
     handler: getCandidateprivileges,
     method: API_METHODS.GET,
   },
@@ -77,6 +78,12 @@ const candidateRoutes: IRouteOptions<{
     url: "/submit/:id",
     preHandler: [jwtVerification],
     handler: submitTest,
+    method: API_METHODS.POST,
+  },
+  {
+    url: "/addTabCount",
+    handler: addNewTabCount,
+    preHandler: [jwtVerification],
     method: API_METHODS.POST,
   },
 ];

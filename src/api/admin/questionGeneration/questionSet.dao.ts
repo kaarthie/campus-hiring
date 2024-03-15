@@ -157,7 +157,7 @@ export async function getQuestionDetails() {
 
     const result = mcqData.reduce((acc, curr) => {
       const { difficultLevel, topic } = curr;
-      
+
       if (difficultLevel && topic) {
         if (!acc[topic]) {
           acc[topic] = {
@@ -166,21 +166,12 @@ export async function getQuestionDetails() {
             hard: 0
           };
         }
-        
+
         acc[topic][difficultLevel]++;
       }
-      
+
       return acc;
     }, {});
-
-    // Add missing topics with all counts set to zero
-    // const topics = ['sql', 'ds', 'logical'];
-    // topics.forEach(topic => {
-    //   if (!result[topic]) {
-    //     result[topic] = { easy: 0, medium: 0, hard: 0 };
-    //   }
-    // });
-    console.log(result);
     return result;
   } catch (error) {
     console.log("Error in getQuestionDetails:", error);;

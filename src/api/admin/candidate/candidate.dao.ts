@@ -81,3 +81,28 @@ export async function createCandidate({
     console.log("Error in createCandidate:", error);
   }
 }
+
+// Function to fetch candidate details
+export async function getCandidateDetailsForExcel(studentId) {
+  try {
+    // Query the database for candidate details
+    const candidate = await prisma.candidateDetailsCollege.findUnique({
+      where: { studentId },
+      select: {
+        name: true,
+        email: true,
+        college: true,
+        branch: true,
+        dateOfBirth: true,
+        gender: true,
+        mobileNumber: true,
+      },
+    });
+
+    return candidate;
+  } catch (error) {
+    console.error('Error fetching candidate details:', error);
+    throw error;
+  }
+}
+
