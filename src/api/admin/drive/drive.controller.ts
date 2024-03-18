@@ -345,7 +345,7 @@ export async function updateDriveHandler(request: any, reply: FastifyReply) {
 
     // Handle uploading excel file if it exists
     if (excelExists) {
-      const excelData = await uploadCandidate(fileData);
+      const excelData = await uploadCandidate(fileData,driveId);
       console.log(excelData);
     }
 
