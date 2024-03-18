@@ -124,10 +124,10 @@ model CandidateDetailsCollege {
   registerNumber       String
   name                 String
   college              String
-  degree               String
+  degree               String?
   branch               String
-  dateOfBirth          String
-  gender               String
+  dateOfBirth          String?
+  gender               String?
   tenthPercentage      Int?
   tenthYOP             Int?
   twelthPercentage     Int?

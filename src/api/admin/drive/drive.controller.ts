@@ -205,8 +205,10 @@ export async function addDrive(request: any, reply: FastifyReply) {
       totalQuestions,
       questionData
     );
-    if (excelExists) {
-      const excelData = await uploadCandidate(fileData);
+    const driveId = response?.result[0].driveId;
+    console.log(driveId,"id check")
+    if (excelExists && driveId) {
+      const excelData = await uploadCandidate(fileData,driveId);
       console.log(excelData);
     } else {
       throw new Error("Upload Students Data");
