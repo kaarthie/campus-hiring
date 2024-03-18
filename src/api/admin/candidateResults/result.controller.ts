@@ -5,6 +5,7 @@ import {
   getDrives,
   driveResults,
   resultsWithScores,
+  filteredDownloadDao,
 } from "./result.dao";
 import { generateExcel, generateExcel2 } from "../../../utils/utils";
 interface driveId {
@@ -69,11 +70,37 @@ export async function driveResult(
 ) {
   try {
     const driveId = Number(request.params.id);
-    const { score, ds, sql, logical }: any = request.query;
-    const report = await driveResults(driveId, score, ds, sql, logical);
-
-    // Condition to be altered
-    if(false) await generateExcel2(report, driveId)
+    const {
+      score,
+      dsOverall,
+      dsE,
+      dsM,
+      dsH,
+      sqlOverall,
+      sqlE,
+      sqlM,
+      sqlH,
+      logicalOverall,
+      logicalE,
+      logicalM,
+      logicalH,
+    }: any = request.query;
+    const report = await driveResults(
+      driveId,
+      score,
+      dsOverall,
+      dsE,
+      dsM,
+      dsH,
+      sqlOverall,
+      sqlE,
+      sqlM,
+      sqlH,
+      logicalOverall,
+      logicalE,
+      logicalM,
+      logicalH
+    );
     if (report) {
       reply.code(200).send({
         status: true,
@@ -81,6 +108,61 @@ export async function driveResult(
         testStartedCount: report?.loginAttemptsCount,
         testSubmittedCount: report?.submittedTestCount,
         notstarted: report?.notstarted,
+      });
+    } else {
+      reply.code(404).send({
+        status: false,
+        message: "couldn't get completed drives and results",
+      });
+    }
+  } catch (error) {
+    console.log("Error in driveResult: ", error);
+    reply.code(500).send({ status: false, message: error.message });
+  }
+}
+
+export async function filteredDownload(
+  request: FastifyRequest<{ Params: driveId }>,
+  reply: FastifyReply
+) {
+  try {
+    const driveId = Number(request.params.id);
+    const {
+      score,
+      dsOverall,
+      dsE,
+      dsM,
+      dsH,
+      sqlOverall,
+      sqlE,
+      sqlM,
+      sqlH,
+      logicalOverall,
+      logicalE,
+      logicalM,
+      logicalH,
+    }: any = request.query;
+    const report = await filteredDownloadDao(
+      driveId,
+      score,
+      dsOverall,
+      dsE,
+      dsM,
+      dsH,
+      sqlOverall,
+      sqlE,
+      sqlM,
+      sqlH,
+      logicalOverall,
+      logicalE,
+      logicalM,
+      logicalH
+    );
+    if (report) {
+      reply.code(200).send({
+        status: true,
+        result: report?.results,
+        excelLink: report?.excelLink,
       });
     } else {
       reply.code(404).send({

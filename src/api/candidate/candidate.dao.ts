@@ -475,28 +475,14 @@ export async function submitTestDao(submitted, studentId, round, driveId) {
   }
 }
 
-export async function createTabCount(tabCount, candidateId) {
+export async function verifySlugDao(slug: string) {
   try {
-    console.log(tabCount, "FIRED");
-    const tabSwitch = await prisma.tabSwitch.findFirst({
-      where: { candidateId: Number(candidateId) },
+    const slugDetails = await prisma.slugDetails.findUnique({
+      where: { slug: slug },
+      include: { drive: true },
     });
-    let response;
-    if (tabSwitch) {
-      response = await prisma.tabSwitch.update({
-        where: { candidateId: Number(candidateId) },
-        data: { tabCount: { increment: 1 } },
-      });
-    } else {
-      response = await prisma.tabSwitch.create({
-        data: {
-          tabCount: 1,
-          candidateId: Number(candidateId),
-        },
-      });
-    }
-    return response;
+    return slugDetails?.drive?.driveStatus === "pending" ? true : false;
   } catch (error) {
-    console.log("Error in createCandidate:", error);
+    console.log("Error in verifySlugDao() ->", error);
   }
 }

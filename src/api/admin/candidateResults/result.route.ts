@@ -7,6 +7,7 @@ import {
   completedandPendingDrives,
   driveResult,
   filteredResult,
+  filteredDownload,
 } from "./result.controller";
 
 const resultRoutes: IRouteOptions<{
@@ -35,6 +36,12 @@ const resultRoutes: IRouteOptions<{
   {
     url: "/result/:id",
     handler: driveResult,
+    preHandler: [jwtAdminVerification],
+    method: API_METHODS.GET,
+  },
+  {
+    url: "/resultDownload/:id",
+    handler: filteredDownload,
     preHandler: [jwtAdminVerification],
     method: API_METHODS.GET,
   },

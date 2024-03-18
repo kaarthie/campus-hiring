@@ -25,7 +25,8 @@ export async function createCandidate({
   mobileNumber,
   email,
   address,
-} ) {
+}) {
+  console.log(driveId, ":HERE");
   try {
     const response = await prisma.candidateDetailsCollege.create({
       data: {
@@ -106,3 +107,56 @@ export async function getCandidateDetailsForExcel(studentId) {
   }
 }
 
+
+export async function candidateStatusDao(driveId: number) {
+  try {
+    const testStartedCandidates = await prisma.candidateTracking.findMany({
+      where: { driveId },
+    });
+
+    const testSubmittedCandidates = await prisma.submitTest.findMany({
+      where: { driveId },
+    });
+
+    const notSubmittedCandidates = testStartedCandidates.filter(
+      (startedCandidate) => {
+        const hasSubmitted = testSubmittedCandidates.some(
+          (submittedCandidate) =>
+            submittedCandidate.candidateId === startedCandidate.studentId
+        );
+        return !hasSubmitted;
+      }
+    );
+
+    const overallCandidates = await prisma.candidateDetailsCollege.findMany({
+      where: { driveId },
+    });
+
+    const remainingCandidates = overallCandidates.filter((candidate) => {
+      const hasStarted = testStartedCandidates.some(
+        (startedCandidate) => startedCandidate.studentId === candidate.studentId
+      );
+      const hasSubmitted = testSubmittedCandidates.some(
+        (submittedCandidate) =>
+          submittedCandidate.candidateId === candidate.studentId
+      );
+      return !hasStarted || !hasSubmitted;
+    });
+
+    const notAttendedCandidates = remainingCandidates.filter((candidate) => {
+      const hasStarted = notSubmittedCandidates.some(
+        (notSubmittedCandidate) =>
+          notSubmittedCandidate.studentId === candidate.studentId
+      );
+      return !hasStarted;
+    });
+
+    return {
+      notSubmittedCandidates,
+      testSubmittedCandidates,
+      notAttendedCandidates,
+    };
+  } catch (error) {
+    console.log("Error in candidateStatusDao() ->", error);
+  }
+}

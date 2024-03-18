@@ -11,6 +11,7 @@ import {
   storeCandidateTime,
   checkSubmitted,
   createTabCount,
+  verifySlugDao,
 } from "./candidate.dao";
 import redis from "../../config/redis";
 import {
@@ -303,5 +304,24 @@ export async function addNewTabCount(
       status: false,
       message: error.message,
     });
+  }
+}
+
+export async function verifySlug(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    const slug: string = (request.body as any).slug;
+    const response = await verifySlugDao(slug);
+    if (response) {
+      reply
+        .code(200)
+        .send({ status: true, message: "Slug is verfied and it is in live" });
+    } else {
+      reply
+        .code(404)
+        .send({ status: false, message: "Slug is not verfied, No content" });
+    }
+  } catch (error) {
+    console.log("Error in verifySlug() ->", error);
+    reply.code(500).send({ status: false, message: error.message });
   }
 }

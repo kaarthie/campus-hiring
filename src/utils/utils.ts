@@ -90,55 +90,54 @@ export async function generateExcel(Result, driveId) {
   }
 }
 
-
-export async function generateExcel2(result, driveId) {
+export async function generateExcel2(Result, driveId) {
   try {
     const workbook = await XlsxPopulate.fromBlankAsync();
     const sheet = workbook.sheet("Sheet1");
-    const Result = await enrichTestReportDetails(result["results"])
-    const student_count = result["results"].length
+
     // Add headers
     const headerWidths = {
-      Score: 8,
-      // "Student Count": 15,
-      "Candidate Id": 15,
-      "Student Id": 10,
-      "Register Number": 15,
+      "Roll No": 15,
       Name: 20,
       Email: 40,
       College: 20,
       Branch: 15,
-      "Date Of Birth": 15,
       Gender: 12,
       "Mobile Number": 15,
+      Score: 10,
+      "Ds score": 10,
+      "SQL score": 10,
+      "Logical score": 10,
     };
 
     Object.entries(headerWidths).forEach(([header, width], index) => {
       sheet.cell(1, index + 1).value(header);
       sheet.column(index + 1).width(width);
     });
+
     // Populate the sheet with data
     let currentRow = 2;
-    Result.forEach((candidate) => {
-        sheet.cell(currentRow, 1).value(candidate.score);
-        sheet.cell(currentRow, 2).value(candidate.candidateId);
-        sheet.cell(currentRow, 3).value(candidate.studentId);
-        sheet.cell(currentRow, 4).value(candidate.registerNumber);
-        sheet.cell(currentRow, 5).value(candidate.name);
-        sheet.cell(currentRow, 6).value(candidate.email);
-        sheet.cell(currentRow, 7).value(candidate.college);
-        sheet.cell(currentRow, 8).value(candidate.branch);
-        sheet.cell(currentRow, 9).value(candidate.dateOfBirth);
-        sheet.cell(currentRow, 10).value(candidate.gender);
-        sheet.cell(currentRow, 11).value(candidate.mobileNumber);
-        currentRow++;
-      });
+    Result.forEach((entry) => {
+      sheet.cell(currentRow, 1).value(entry.registerNumber);
+      sheet.cell(currentRow, 2).value(entry.name);
+      sheet.cell(currentRow, 3).value(entry.email);
+      sheet.cell(currentRow, 4).value(entry.college);
+      sheet.cell(currentRow, 5).value(entry.branch);
+      sheet.cell(currentRow, 6).value(entry.gender);
+      sheet.cell(currentRow, 7).value(entry.mobileNumber);
+      sheet.cell(currentRow, 8).value(entry.score);
+      sheet.cell(currentRow, 9).value(entry.ds);
+      sheet.cell(currentRow, 10).value(entry.sql);
+      sheet.cell(currentRow, 11).value(entry.logical);
+      currentRow++;
+    });
 
     const timestamp = new Date().toISOString();
 
     pathToExcel = path.join(
       __dirname +
-        `${timestamp}-${driveId}.xlsx`
+        `../../NextRoundStudents/` +
+        `studentsData-${timestamp}-${driveId}.xlsx`
     );
 
     await workbook.toFileAsync(pathToExcel);
@@ -148,54 +147,10 @@ export async function generateExcel2(result, driveId) {
       public_id: `studentData-drive-${timestamp}-${driveId}`,
       tags: ["excel", "files"],
     });
-    console.log(resultant.secure_url);
+
     return resultant.secure_url;
   } catch (error) {
     console.log(error);
-  }
-}
-
-async function enrichTestReportDetails(testReportDetails: any[]): Promise<any[]> {
-  try {
-    const enrichedDetails: any[] = [];
-
-    for (const report of testReportDetails) {
-      const { ds, logical, sql, ...reportWithoutUnwantedFields } = report; // Destructure and exclude unwanted fields
-      const studentId: number = report.candidateId;
-      const candidateDetails = await getCandidateDetailsForExcel(studentId);
-      // Merge candidate details into test report without the candidate key
-      const enrichedReport = { ...reportWithoutUnwantedFields, ...candidateDetails };
-      const {
-        candidateId,
-        score,
-        name,
-        email,
-        college,
-        branch,
-        dateOfBirth,
-        gender,
-        mobileNumber
-      } = enrichedReport;
-      const newObject = {
-        candidateId,
-        studentId,
-        score,
-        registerNumber : enrichedReport?.student?.registerNumber,
-        name,
-        email,
-        college,
-        branch,
-        dateOfBirth,
-        gender,
-        mobileNumber
-      };
-      enrichedDetails.push(newObject);
-    }
-    console.log(enrichedDetails);
-    return enrichedDetails;
-  } catch (error) {
-    console.error('Error enriching test report details:', error);
-    throw error;
   }
 }
 
@@ -231,8 +186,8 @@ export async function collectStream(stream) {
     }
     return data;
   } catch (error) {
-    console.log("Error in collectStream: ",error);
-    throw error
+    console.log("Error in collectStream: ", error);
+    throw error;
   }
 }
 

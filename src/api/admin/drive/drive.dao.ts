@@ -28,6 +28,16 @@ export async function getDriveDetails() {
     );
     console.log(filteredCampuses);
     return filteredCampuses;
+
+    // const response = await prisma.drive.findMany({
+    //   include: {
+    //     campus: true,
+    //     Rounds: true,
+    //     feedBack: true,
+    //     CandidateDetailsCollege: true,
+    //   },
+    // });
+    // return response;
   } catch (error) {
     console.log("Error in getDriveDetails:", error);
   }
@@ -37,7 +47,7 @@ export async function getDrive() {
   try {
     const driveData = await prisma.drive.findMany({
       where: {
-        driveStatus: "upcoming",
+        NOT: { driveStatus: "completed" },
       },
     });
     const driveIds = driveData.map((data) => {
@@ -100,7 +110,7 @@ export async function createNewDrive(
   questionData
 ) {
   try {
-    skip = skip === "No" ? false : true
+    skip = skip === "No" ? false : true;
     const result = await prisma.$transaction([
       prisma.drive.create({
         data: {
@@ -428,4 +438,3 @@ export async function updateDrive(
     console.log("Error in updateDrive:", error);
   }
 }
-

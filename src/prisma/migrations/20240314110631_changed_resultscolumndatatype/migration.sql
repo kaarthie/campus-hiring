@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `Results` MODIFY `ds` VARCHAR(191) NOT NULL,
+    MODIFY `logical` VARCHAR(191) NOT NULL,
+    MODIFY `sql` VARCHAR(191) NOT NULL;

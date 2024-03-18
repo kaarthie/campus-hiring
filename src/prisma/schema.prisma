@@ -35,8 +35,16 @@ model Drive {
   Results                 Results[]
   submitTest              submitTest[]
   jobRoles                jobRoles[]
+  slugDetails             slugDetails[]
 
   @@map("drive_details")
+}
+
+model slugDetails {
+  id      Int    @id @unique @default(autoincrement())
+  driveId Int
+  slug    String @unique
+  drive   Drive  @relation(fields: [driveId], references: [driveId])
 }
 
 model college {
@@ -216,18 +224,34 @@ model Rounds {
 
 model Results {
   driveId        Int
-  candidateId    Int
+  candidateId    Int                     @unique
   round          Int
   score          Int                     @default(0)
-  ds             Int                     @default(0)
-  logical        Int                     @default(0)
-  sql            Int                     @default(0)
   tabSwitchCount Int                     @default(0)
   drive          Drive                   @relation(fields: [driveId], references: [driveId])
   student        CandidateDetailsCollege @relation(fields: [candidateId], references: [studentId])
   rounds         Rounds                  @relation(fields: [round, driveId], references: [round, driveId])
+  topicScores    topicScores[]
 
   @@id([driveId, candidateId, round])
+}
+
+model topicScores {
+  id             Int     @id @default(autoincrement())
+  candidateId    Int
+  ds             Int     @default(0)
+  ds_easy        Int     @default(0)
+  ds_medium      Int     @default(0)
+  ds_hard        Int     @default(0)
+  sql            Int     @default(0)
+  sql_easy       Int     @default(0)
+  sql_medium     Int     @default(0)
+  sql_hard       Int     @default(0)
+  logical        Int     @default(0)
+  logical_easy   Int     @default(0)
+  logical_medium Int     @default(0)
+  logical_hard   Int     @default(0)
+  result         Results @relation(fields: [candidateId], references: [candidateId])
 }
 
 model adminCredentials {
