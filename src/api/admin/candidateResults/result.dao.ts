@@ -98,7 +98,7 @@ export async function resultDao(roundId) {
           (ans) => ans.id === questionId
         );
 
-        if (correctAnswer) {
+        if (correctAnswer && correctAnswer.answer === response.answer) {
           const { topic, difficultLevel }: any = correctAnswer;
 
           if (!scores[topic]) {
