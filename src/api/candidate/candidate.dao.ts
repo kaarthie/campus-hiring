@@ -163,7 +163,11 @@ export async function driveInstructions() {
     if (!privileges?.RoundPrivileges?.IsSkipped) {
       let newInstruction =
         "You cannot be able to skip the questions without answering them.";
-      generalInstructions = [...generalInstructions, newInstruction, "Please note that you will not be able to go back to any of the previous question after clicking Next button."];
+      generalInstructions = [
+        ...generalInstructions,
+        newInstruction,
+        "Please note that you will not be able to go back to any of the previous question after clicking Next button.",
+      ];
       console.log("General Instructions  " + generalInstructions);
     }
     // if (privileges?.RoundPrivileges?.SubmitOnAnswered) {
@@ -484,5 +488,31 @@ export async function verifySlugDao(slug: string) {
     return slugDetails?.drive?.driveStatus === "pending" ? true : false;
   } catch (error) {
     console.log("Error in verifySlugDao() ->", error);
+  }
+}
+
+export async function createTabCount(tabCount, candidateId) {
+  try {
+    console.log(tabCount, "FIRED");
+    const tabSwitch = await prisma.tabSwitch.findFirst({
+      where: { candidateId: Number(candidateId) },
+    });
+    let response;
+    if (tabSwitch) {
+      response = await prisma.tabSwitch.update({
+        where: { candidateId: Number(candidateId) },
+        data: { tabCount: { increment: 1 } },
+      });
+    } else {
+      response = await prisma.tabSwitch.create({
+        data: {
+          tabCount: 1,
+          candidateId: Number(candidateId),
+        },
+      });
+    }
+    return response;
+  } catch (error) {
+    console.log("Error in createCandidate:", error);
   }
 }

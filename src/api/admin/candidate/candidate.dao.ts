@@ -113,36 +113,42 @@ export async function candidateStatusDao(driveId: number) {
       where: { driveId },
     });
 
-    const candidatesWithStatus = await Promise.all(candidatesData.map(async (data) => {
-      let testAttended = false;
-      let testSubmitted = false;
+    const candidatesWithStatus = await Promise.all(
+      candidatesData.map(async (data) => {
+        let testAttended = false;
+        let testSubmitted = false;
 
-      const testAttendedData = await prisma.candidateTracking.findFirst({
-        where: { studentId: data?.studentId },
-      });
+        const testAttendedData = await prisma.candidateTracking.findFirst({
+          where: { studentId: data?.studentId },
+        });
 
-      const testSubmittedData = await prisma.submitTest.findFirst({
-        where: { candidateId: data?.studentId },
-      });
+        const testSubmittedData = await prisma.submitTest.findFirst({
+          where: { candidateId: data?.studentId },
+        });
 
-      const questionsAttended = await prisma.answers.count({
-        where: { candidateId: data?.studentId },
-      });
+        const questionsAttended = await prisma.answers.count({
+          where: { candidateId: data?.studentId },
+        });
 
-      if (testAttendedData) {
-        testAttended = true;
-      }
+        if (testAttendedData) {
+          testAttended = true;
+        }
 
-      if (testSubmittedData) {
-        testSubmitted = true;
-      }
+        if (testSubmittedData) {
+          testSubmitted = true;
+        }
 
-      return { ...data, testAttended, testSubmitted, questionsAttended };
-    }));
+        return {
+          ...data,
+          testAttended,
+          testSubmitted,
+          questionsAttended: questionsAttended || 0,
+        };
+      })
+    );
 
     return { candidatesData: candidatesWithStatus };
   } catch (error) {
     console.log("Error in candidateStatusDao() ->", error);
   }
 }
-
