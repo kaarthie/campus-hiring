@@ -110,6 +110,7 @@ model RecruitmentTeamMembers {
   name     String
   email    String
   position String
+  addedBy  String
 
   @@map("recruitment_team_members")
 }
@@ -288,5 +289,6 @@ model RecruitmentTeam {
   teamMembers String
   position    String
   drive       Drive  @relation(fields: [driveId], references: [driveId])
+
   @@map("recruitment_team")
 }

@@ -33,17 +33,21 @@ export async function verifyCandidate(
           .code(200)
           .send({ status: true, token: token, message: "admin Verified" });
       } else {
-        const response = await createAdmin(`${email}`);
-        const payload = {
-          email: email,
-        };
-        const token = jwt.sign(payload, process.env.ADMIN_SECRET_KEY, {
-          expiresIn: "24h",
+        reply.code(404).send({
+          status: false,
+          message: "admin is not registered",
         });
-        console.log(token);
-        reply
-          .code(200)
-          .send({ status: true, token: token, message: "admin Verified" });
+        // const response = await createAdmin(`${email}`);
+        // const payload = {
+        //   email: email,
+        // };
+        // const token = jwt.sign(payload, process.env.ADMIN_SECRET_KEY, {
+        //   expiresIn: "24h",
+        // });
+        // console.log(token);
+        // reply
+        //   .code(200)
+        //   .send({ status: true, token: token, message: "admin Verified" });
       }
     } else {
       reply.code(404).send({

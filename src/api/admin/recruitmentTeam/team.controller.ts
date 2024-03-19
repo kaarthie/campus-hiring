@@ -13,6 +13,7 @@ export async function getRecruitmentTeamMembers(
   reply: FastifyReply
 ) {
   try {
+    // const 
     const members = await getMembers();
     const questionDetails = await getQuestionDetails()
     if (members) {
