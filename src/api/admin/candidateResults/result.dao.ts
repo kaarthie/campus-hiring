@@ -223,7 +223,8 @@ export async function driveResults({
     const query = `
     SELECT 
         r.*, 
-        s.name AS student_name, 
+        s.name AS student_name,
+        tab.tabCount AS tab_count, 
         s.registerNumber AS student_registerNumber, 
         s.branch AS student_branch,
         rd.roundTestConfig AS round_test_config,
@@ -247,6 +248,8 @@ export async function driveResults({
         candidate_details_college AS s ON r.candidateId = s.studentId
     JOIN 
         topicScores AS ts ON r.candidateId = ts.candidateId
+    JOIN
+        tabSwitch AS tab ON r.candidateId = tab.candidateId
     WHERE 
         r.driveId = ${Number(driveId) || 0}
         AND ${
@@ -337,6 +340,7 @@ export async function filteredDownloadDao({
     SELECT 
         r.*, 
         s.name AS student_name, 
+        tab.tabCount AS tab_count, 
         s.registerNumber AS student_registerNumber, 
         s.email AS student_email,
         s.college AS student_college,
@@ -362,6 +366,8 @@ export async function filteredDownloadDao({
         candidate_details_college AS s ON r.candidateId = s.studentId
     JOIN 
         topicScores AS ts ON r.candidateId = ts.candidateId
+    JOIN
+        tabSwitch AS tab ON r.candidateId = tab.candidateId
     WHERE 
         r.driveId = ${Number(driveId) || 0}
         AND ${
@@ -407,7 +413,7 @@ export async function filteredDownloadDao({
       branch: data?.student_branch,
       gender: data?.student_gender,
       mobileNumber: data?.student_mobile_no,
-      tabSwtchCount: data?.tabSwitchCount,
+      tabSwitchCount: data?.tab_count,
     }));
     console.log(Result, "CHECKL");
 
