@@ -28,6 +28,7 @@ import redis from "../../../config/redis";
 import { resultDao } from "../candidateResults/result.dao";
 import { uploadCandidate } from "../../../services/candidateGeneration";
 import { collectStream, transformDriveResponse } from "../../../utils/utils";
+import { createSlugDao } from "../slug/slug.dao";
 
 export async function getDetails(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -200,12 +201,14 @@ export async function addDrive(request: any, reply: FastifyReply) {
       questionData
     );
     const driveId = response?.result[0].driveId;
-    console.log(driveId, "id check");
+
     if (excelExists && driveId) {
-      const excelData = await uploadCandidate(fileData, driveId);
-      console.log(excelData);
+      await uploadCandidate(fileData, driveId);
     } else {
       throw new Error("Upload Students Data");
+    }
+    if (driveId) {
+      await createSlugDao(driveId);
     }
     reply.code(200).send({ status: true, message: "Drive Created" });
   } catch (error) {

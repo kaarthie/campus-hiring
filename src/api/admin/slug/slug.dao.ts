@@ -35,16 +35,9 @@ async function generateSlug(driveId: number) {
   }
 
   const firstThreeLetters = college.slice(0, 3).toUpperCase();
-  const campusYear = campusDetail.campus.campusYear;
-  const middleLetters = campusDetail.driveDate.toLocaleDateString();
-  let lastTwoDigits: string;
-  if (campusYear.includes("-")) {
-    const [first, last] = campusYear.split("-");
-    lastTwoDigits = `${first.slice(2)}-${last.slice(2)}`;
-  } else {
-    lastTwoDigits = campusYear.slice(2);
-  }
+  let middleLetters: any = campusDetail.driveDate.toLocaleDateString();
+  middleLetters = middleLetters.replaceAll("/", "");
 
-  const slug = `${firstThreeLetters}_${middleLetters}_${lastTwoDigits}`;
+  const slug = `${firstThreeLetters}${middleLetters}`;
   return slug;
 }

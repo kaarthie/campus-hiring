@@ -11,3 +11,5 @@ export async function createSlug(request: FastifyRequest, reply: FastifyReply) {
     reply.code(500).send({ status: false, message: error.message });
   }
 }
+
+

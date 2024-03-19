@@ -14,8 +14,12 @@ const driveRoutes: IRouteOptions<{
     preHandler: [jwtAdminVerification],
     method: API_METHODS.POST,
   },
-  
-  
+  // {
+  //   url: "/updateSlug/:driveId",
+  //   handler: updateSlug,
+  //   preHandler: [jwtAdminVerification],
+  //   method: API_METHODS.PUT,
+  // },
 ];
 
 export default driveRoutes;
