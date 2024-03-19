@@ -150,7 +150,9 @@ export async function addDrive(request: any, reply: FastifyReply) {
       skip,
       questionData,
     }: any = data;
-    console.log("Drive Data ", data);
+    if (!recruitmentTeam) {
+      throw new Error("Please add atleast one recruitment member");
+    }
     const roundData: any = JSON.parse(questionData);
 
     const total: any = Object.values(roundData).reduce(
