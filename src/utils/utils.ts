@@ -130,7 +130,7 @@ export async function generateExcel2(Result, driveId) {
       sheet.cell(currentRow, 9).value(entry.ds);
       sheet.cell(currentRow, 10).value(entry.sql);
       sheet.cell(currentRow, 11).value(entry.logical);
-      sheet.cell(currentRow, 12).value(entry.tabSwitchCount);
+      sheet.cell(currentRow, 12).value(entry?.tabSwitchCount || 0);
       currentRow++;
     });
 
@@ -217,5 +217,4 @@ export function transformDriveResponse(responseBody) {
     recruitmentTeam: RecruitmentTeam,
     questionData: JSON.parse(Rounds[0].roundTestConfig),
   };
-
 }
