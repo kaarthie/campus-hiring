@@ -108,7 +108,7 @@ export async function generateExcel2(Result, driveId) {
       "Ds score": 10,
       "SQL score": 10,
       "Logical score": 10,
-      // "Tab Count": 10,
+      "Tab Count": 10,
     };
 
     Object.entries(headerWidths).forEach(([header, width], index) => {
@@ -130,7 +130,7 @@ export async function generateExcel2(Result, driveId) {
       sheet.cell(currentRow, 9).value(entry.ds);
       sheet.cell(currentRow, 10).value(entry.sql);
       sheet.cell(currentRow, 11).value(entry.logical);
-      // sheet.cell(currentRow, 12).value(entry.tabSwitchCount);
+      sheet.cell(currentRow, 12).value(entry.tabSwitchCount);
       currentRow++;
     });
 
