@@ -108,6 +108,7 @@ export async function generateExcel2(Result, driveId) {
       "Ds score": 10,
       "SQL score": 10,
       "Logical score": 10,
+      // "Tab Count": 10,
     };
 
     Object.entries(headerWidths).forEach(([header, width], index) => {
@@ -129,6 +130,7 @@ export async function generateExcel2(Result, driveId) {
       sheet.cell(currentRow, 9).value(entry.ds);
       sheet.cell(currentRow, 10).value(entry.sql);
       sheet.cell(currentRow, 11).value(entry.logical);
+      // sheet.cell(currentRow, 12).value(entry.tabSwitchCount);
       currentRow++;
     });
 
@@ -199,22 +201,22 @@ export function transformDriveResponse(responseBody) {
     jobRoles,
     Rounds,
     RoundPrivileges,
-    RecruitmentTeam
+    RecruitmentTeam,
   } = responseBody;
 
   const driveData = {
     hiringYear: campusId, // Using campusId as hiringYear
     collegeName,
-    driveDate: new Date(driveDate).toISOString().split('T')[0], // Formatting driveDate to 'YYYY-MM-DD'
-    jobRoles: jobRoles.map(role => role.jobRole), // Concatenating job roles
+    driveDate: new Date(driveDate).toISOString().split("T")[0], // Formatting driveDate to 'YYYY-MM-DD'
+    jobRoles: jobRoles.map((role) => role.jobRole), // Concatenating job roles
     roundName: Rounds[0].roundName, // Assuming there's only one round
     duration: Rounds[0].roundDuration,
     totalQuestions: Rounds[0].roundTotalQuestions,
-    skip: RoundPrivileges[0].IsSkipped ? 'Yes' : 'No', // Assuming there's only one round and privilege
+    skip: RoundPrivileges[0].IsSkipped ? "Yes" : "No", // Assuming there's only one round and privilege
     questionTopics: Object.keys(JSON.parse(Rounds[0].roundTestConfig)),
     recruitmentTeam: RecruitmentTeam,
-    questionData: JSON.parse(Rounds[0].roundTestConfig)
+    questionData: JSON.parse(Rounds[0].roundTestConfig),
   };
 
-  return { "driveData": driveData };
+  return { driveData: driveData };
 }

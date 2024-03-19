@@ -102,61 +102,47 @@ export async function getCandidateDetailsForExcel(studentId) {
 
     return candidate;
   } catch (error) {
-    console.error('Error fetching candidate details:', error);
+    console.error("Error fetching candidate details:", error);
     throw error;
   }
 }
 
-
 export async function candidateStatusDao(driveId: number) {
   try {
-    const testStartedCandidates = await prisma.candidateTracking.findMany({
+    const candidatesData = await prisma.candidateDetailsCollege.findMany({
       where: { driveId },
     });
 
-    const testSubmittedCandidates = await prisma.submitTest.findMany({
-      where: { driveId },
-    });
+    const candidatesWithStatus = await Promise.all(candidatesData.map(async (data) => {
+      let testAttended = false;
+      let testSubmitted = false;
 
-    const notSubmittedCandidates = testStartedCandidates.filter(
-      (startedCandidate) => {
-        const hasSubmitted = testSubmittedCandidates.some(
-          (submittedCandidate) =>
-            submittedCandidate.candidateId === startedCandidate.studentId
-        );
-        return !hasSubmitted;
+      const testAttendedData = await prisma.candidateTracking.findFirst({
+        where: { studentId: data?.studentId },
+      });
+
+      const testSubmittedData = await prisma.submitTest.findFirst({
+        where: { candidateId: data?.studentId },
+      });
+
+      const questionsAttended = await prisma.answers.count({
+        where: { candidateId: data?.studentId },
+      });
+
+      if (testAttendedData) {
+        testAttended = true;
       }
-    );
 
-    const overallCandidates = await prisma.candidateDetailsCollege.findMany({
-      where: { driveId },
-    });
+      if (testSubmittedData) {
+        testSubmitted = true;
+      }
 
-    const remainingCandidates = overallCandidates.filter((candidate) => {
-      const hasStarted = testStartedCandidates.some(
-        (startedCandidate) => startedCandidate.studentId === candidate.studentId
-      );
-      const hasSubmitted = testSubmittedCandidates.some(
-        (submittedCandidate) =>
-          submittedCandidate.candidateId === candidate.studentId
-      );
-      return !hasStarted || !hasSubmitted;
-    });
+      return { ...data, testAttended, testSubmitted, questionsAttended };
+    }));
 
-    const notAttendedCandidates = remainingCandidates.filter((candidate) => {
-      const hasStarted = notSubmittedCandidates.some(
-        (notSubmittedCandidate) =>
-          notSubmittedCandidate.studentId === candidate.studentId
-      );
-      return !hasStarted;
-    });
-
-    return {
-      notSubmittedCandidates,
-      testSubmittedCandidates,
-      notAttendedCandidates,
-    };
+    return { candidatesData: candidatesWithStatus };
   } catch (error) {
     console.log("Error in candidateStatusDao() ->", error);
   }
 }
+

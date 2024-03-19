@@ -278,7 +278,7 @@ export async function driveResults(
 
     console.log(query);
 
-    const results = await prisma.$queryRaw(Prisma.raw(query));
+    const results: any = await prisma.$queryRaw(Prisma.raw(query));
 
     const notStartedTestCount = await prisma.candidateDetailsCollege.count({
       where: {
@@ -307,7 +307,7 @@ export async function driveResults(
       loginAttemptsCount: loginAttemptsCount,
       submittedTestCount: submittedTestCount,
       notstarted: notstarted,
-      overallStudentCount: results.length
+      overallStudentCount: results.length,
     };
 
     // console.log(results, loginAttemptsCount, submittedTestCount);
@@ -407,14 +407,14 @@ export async function filteredDownloadDao(
       branch: data?.student_branch,
       gender: data?.student_gender,
       mobileNumber: data?.student_mobile_no,
+      tabSwtchCount: data?.tabSwitchCount,
     }));
     console.log(Result, "CHECKL");
 
     const DataLink = await generateExcel2(Result, driveId);
 
     return {
-      results: results,
-      excelLink: DataLink,
+      excelLink: DataLink || "",
     };
   } catch (error) {
     console.log("Error in driveResults:", error);

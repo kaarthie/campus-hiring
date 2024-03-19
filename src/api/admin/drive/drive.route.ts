@@ -86,7 +86,7 @@ const driveRoutes: IRouteOptions<{
     handler: getDriveByIdHandler,
     preHandler: [jwtAdminVerification],
     method: API_METHODS.GET,
-  }
+  },
 ];
 
 export default driveRoutes;

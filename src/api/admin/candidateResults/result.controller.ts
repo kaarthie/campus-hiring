@@ -65,7 +65,7 @@ export async function completedandPendingDrives(
 }
 
 export async function driveResult(
-  request: FastifyRequest<{ Params: driveId, }>,
+  request: FastifyRequest<{ Params: driveId }>,
   reply: FastifyReply
 ) {
   try {
@@ -104,7 +104,7 @@ export async function driveResult(
     if (report) {
       reply.code(200).send({
         status: true,
-        result: report?.results,
+        count: report?.results?.length || 0,
         testStartedCount: report?.loginAttemptsCount,
         testSubmittedCount: report?.submittedTestCount,
         notstarted: report?.notstarted,
@@ -161,8 +161,7 @@ export async function filteredDownload(
     if (report) {
       reply.code(200).send({
         status: true,
-        result: report?.results,
-        excelLink: report?.excelLink,
+        excelLink: report?.excelLink || '',
       });
     } else {
       reply.code(404).send({
