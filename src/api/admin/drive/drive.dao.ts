@@ -363,10 +363,10 @@ export async function getDriveById(driveId) {
           (acc: any, val: any) => acc + val,
           0
         );
-        transformedResults[`${topic}Overall`] = overall;
-        transformedResults[`${topic}E`] = resultsFormat[topic].easy || 0;
-        transformedResults[`${topic}M`] = resultsFormat[topic].medium || 0;
-        transformedResults[`${topic}H`] = resultsFormat[topic].hard || 0;
+        transformedResults[`${topic.toUpperCase()} Overall`] = overall;
+        transformedResults[`${topic.toUpperCase()} Easy`] = resultsFormat[topic].easy || 0;
+        transformedResults[`${topic.toUpperCase()} Medium`] = resultsFormat[topic].medium || 0;
+        transformedResults[`${topic.toUpperCase()} Hard`] = resultsFormat[topic].hard || 0;
       });
     }
 

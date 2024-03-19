@@ -203,22 +203,22 @@ export async function getDrives() {
   }
 }
 
-export async function driveResults(
-  driveId: number,
-  score: number,
-  dsOverall: number,
-  dsE: number,
-  dsM: number,
-  dsH: number,
-  sqlOverall: number,
-  sqlE: number,
-  sqlM: number,
-  sqlH: number,
-  logicalOverall: number,
-  logicalE: number,
-  logicalM: number,
-  logicalH: number
-) {
+export async function driveResults({
+  driveId,
+  score,
+  dsOverall,
+  dsE,
+  dsM,
+  dsH,
+  sqlOverall,
+  sqlE,
+  sqlM,
+  sqlH,
+  logicalOverall,
+  logicalE,
+  logicalM,
+  logicalH,
+}) {
   try {
     const query = `
     SELECT 
@@ -301,7 +301,6 @@ export async function driveResults(
     });
     console.log(loginAttemptsCount);
     let notstarted = 0;
-    
 
     return {
       results: results,

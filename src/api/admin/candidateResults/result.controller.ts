@@ -70,37 +70,24 @@ export async function driveResult(
 ) {
   try {
     const driveId = Number(request.params.id);
-    const {
-      score,
-      dsOverall,
-      dsE,
-      dsM,
-      dsH,
-      sqlOverall,
-      sqlE,
-      sqlM,
-      sqlH,
-      logicalOverall,
-      logicalE,
-      logicalM,
-      logicalH,
-    }: any = request.query;
-    const report = await driveResults(
-      driveId,
-      score,
-      dsOverall,
-      dsE,
-      dsM,
-      dsH,
-      sqlOverall,
-      sqlE,
-      sqlM,
-      sqlH,
-      logicalOverall,
-      logicalE,
-      logicalM,
-      logicalH
-    );
+    const queryData: any = request.query;
+    const report = await driveResults({
+      driveId: driveId,
+      score: queryData?.score,
+      dsOverall: queryData["DS Overall"],
+      dsE: queryData["DS Easy"],
+      dsM: queryData["DS Medium"],
+      dsH: queryData["DS Hard"],
+      sqlOverall: queryData["SQL Overall"],
+      sqlE: queryData["SQL Easy"],
+      sqlM: queryData["SQL Medium"],
+      sqlH: queryData["SQL Hard"],
+      logicalOverall: queryData["LOGICAL Overall"],
+      logicalE: queryData["LOGICAL Easy"],
+      logicalM: queryData["LOGICAL Medium"],
+      logicalH: queryData["LOGICAL Hard"],
+    });
+
     if (report) {
       reply.code(200).send({
         status: true,
