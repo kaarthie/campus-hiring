@@ -196,7 +196,7 @@ export async function collectStream(stream) {
 export function transformDriveResponse(responseBody) {
   const {
     campusId,
-    college: { college: collegeName },
+    college: { driveName },
     driveDate,
     jobRoles,
     Rounds,
@@ -206,7 +206,7 @@ export function transformDriveResponse(responseBody) {
 
   return {
     hiringYear: campusId, // Using campusId as hiringYear
-    collegeName,
+    driveName,
     driveDate: new Date(driveDate).toISOString().split("T")[0], // Formatting driveDate to 'YYYY-MM-DD'
     jobRoles: jobRoles.map((role) => role.jobRole), // Concatenating job roles
     roundName: Rounds[0].roundName, // Assuming there's only one round
