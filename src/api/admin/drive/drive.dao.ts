@@ -14,7 +14,7 @@ export async function getDriveDetails() {
             driveStatus: true,
             college: {
               select: {
-                college: true,
+                driveName: true,
               },
             },
             slugDetails: true,
@@ -50,9 +50,17 @@ export async function getDrive() {
       where: {
         NOT: { driveStatus: "completed" },
       },
+      include : {
+        college : {
+          select : {
+            driveName : true
+          }
+        }
+      }
     });
+    console.log("Drive data --> ", driveData);
     const driveIds = driveData.map((data) => {
-      return data.driveId;
+      return data.college?.driveName;
     });
     return driveIds;
   } catch (error) {
@@ -101,7 +109,7 @@ export async function deleteFeedback(id) {
 export async function createNewDrive(
   campusId,
   ConvertedDriveDate,
-  collegeName,
+  driveName,
   recruitmentTeam,
   job,
   duration,
@@ -120,7 +128,7 @@ export async function createNewDrive(
           driveStatus: "upcoming", //
           college: {
             create: {
-              college: collegeName,
+              driveName: driveName,
             },
           },
           // RecruitmentTeam: {
@@ -343,14 +351,18 @@ export async function getDriveById(driveId) {
         driveId: driveId,
       },
       include: {
-        college: true,
+        college: {
+          select : {
+            driveName : true
+          }
+        },
         jobRoles: true,
         RoundPrivileges: true,
         Rounds: true,
         RecruitmentTeam: true,
       },
     });
-
+    console.log("object --> ", drive);
     let resultsFormat = drive?.Rounds[0]?.roundTestConfig
       ? JSON.parse(drive?.Rounds[0]?.roundTestConfig)
       : null;
@@ -380,7 +392,7 @@ export async function updateDrive(
   driveId,
   campusId,
   ConvertedDriveDate,
-  collegeName,
+  driveName,
   recruitmentTeam,
   job,
   duration,
@@ -404,7 +416,7 @@ export async function updateDrive(
         driveDate: new Date(ConvertedDriveDate),
         driveStatus: "upcoming",
         college: {
-          update: { college: collegeName },
+          update: { driveName: driveName },
         },
         jobRoles: {
           deleteMany: {},

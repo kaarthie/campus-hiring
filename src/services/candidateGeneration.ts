@@ -101,7 +101,7 @@ export const uploadCandidate = async (fileStream,id) => {
           // );
           const response = await prisma.candidateDetailsCollege.create({
             data: {
-              driveId: driveId,
+              driveId: +driveId,
               registerNumber: registerNumber,
               name: name,
               college: college,
