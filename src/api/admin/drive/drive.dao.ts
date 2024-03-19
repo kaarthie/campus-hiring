@@ -17,6 +17,7 @@ export async function getDriveDetails() {
                 college: true,
               },
             },
+            slugDetails: true,
             Rounds: true,
             feedBack: true,
           },
@@ -122,7 +123,7 @@ export async function createNewDrive(
               college: collegeName,
             },
           },
-// RecruitmentTeam: {
+          // RecruitmentTeam: {
           //   create: recruitmentTeam.map((teamMember) =>
           //     // console.log(JSON.stringify(teamMember) + " for " + i),
           //     ({
@@ -350,7 +351,26 @@ export async function getDriveById(driveId) {
       },
     });
 
-    return drive;
+    let resultsFormat = drive?.Rounds[0]?.roundTestConfig
+      ? JSON.parse(drive?.Rounds[0]?.roundTestConfig)
+      : null;
+
+    let transformedResults;
+    if (resultsFormat) {
+      transformedResults = {};
+      Object.keys(resultsFormat).forEach((topic) => {
+        const overall = Object.values(resultsFormat[topic]).reduce(
+          (acc: any, val: any) => acc + val,
+          0
+        );
+        transformedResults[`${topic}Overall`] = overall;
+        transformedResults[`${topic}E`] = resultsFormat[topic].easy || 0;
+        transformedResults[`${topic}M`] = resultsFormat[topic].medium || 0;
+        transformedResults[`${topic}H`] = resultsFormat[topic].hard || 0;
+      });
+    }
+
+    return { drive, transformedResults };
   } catch (error) {
     console.log("Error in getDriveById:", error);
   }
@@ -371,9 +391,9 @@ export async function updateDrive(
 ) {
   try {
     // Update the drive
-    console.log("total questions -- ", typeof totalQuestions,typeof duration);
+    console.log("total questions -- ", typeof totalQuestions, typeof duration);
 
-    skip = skip === "No" ? false : true
+    skip = skip === "No" ? false : true;
     job = job.split(",");
 
     // Update drive
@@ -384,7 +404,7 @@ export async function updateDrive(
         driveDate: new Date(ConvertedDriveDate),
         driveStatus: "upcoming",
         college: {
-          update: { college: collegeName }
+          update: { college: collegeName },
         },
         jobRoles: {
           deleteMany: {},
@@ -410,13 +430,11 @@ export async function updateDrive(
       },
     });
 
-    await prisma.recruitmentTeam.deleteMany(
-      {
-        where: {
-          driveId
-        }
-      }
-    )
+    await prisma.recruitmentTeam.deleteMany({
+      where: {
+        driveId,
+      },
+    });
     recruitmentTeam = recruitmentTeam.split(",").map(Number);
     // Update or create recruitment team members
     let recruitmentMembers = await prisma.recruitmentTeamMembers.findMany({

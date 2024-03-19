@@ -204,7 +204,7 @@ export function transformDriveResponse(responseBody) {
     RecruitmentTeam,
   } = responseBody;
 
-  const driveData = {
+  return {
     hiringYear: campusId, // Using campusId as hiringYear
     collegeName,
     driveDate: new Date(driveDate).toISOString().split("T")[0], // Formatting driveDate to 'YYYY-MM-DD'
@@ -218,5 +218,4 @@ export function transformDriveResponse(responseBody) {
     questionData: JSON.parse(Rounds[0].roundTestConfig),
   };
 
-  return { driveData: driveData };
 }

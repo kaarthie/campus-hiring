@@ -35,12 +35,10 @@ export async function getDetails(request: FastifyRequest, reply: FastifyReply) {
     if (response) {
       reply.code(200).send({ status: true, data: response });
     } else {
-      reply
-        .code(403)
-        .send({
-          status: false,
-          message: "error in fetching the drive details",
-        });
+      reply.code(403).send({
+        status: false,
+        message: "error in fetching the drive details",
+      });
     }
   } catch (error) {
     console.log("Error in getDetails: ", error);
@@ -57,12 +55,10 @@ export async function getUpcomingDrive(
     if (response) {
       reply.code(200).send({ status: true, data: response });
     } else {
-      reply
-        .code(403)
-        .send({
-          status: false,
-          message: "error in fetching the drive details",
-        });
+      reply.code(403).send({
+        status: false,
+        message: "error in fetching the drive details",
+      });
     }
   } catch (error) {
     console.log("Error in getUpcomingDrive: ", error);
@@ -94,12 +90,10 @@ export async function addFeedback(
     if (response) {
       reply.code(200).send({ status: true, message: "feedback added" });
     } else {
-      reply
-        .code(403)
-        .send({
-          status: false,
-          message: "error in adding the feedback details",
-        });
+      reply.code(403).send({
+        status: false,
+        message: "error in adding the feedback details",
+      });
     }
   } catch (error) {
     console.log("Error in addFeedback: ", error);
@@ -206,9 +200,9 @@ export async function addDrive(request: any, reply: FastifyReply) {
       questionData
     );
     const driveId = response?.result[0].driveId;
-    console.log(driveId,"id check")
+    console.log(driveId, "id check");
     if (excelExists && driveId) {
-      const excelData = await uploadCandidate(fileData,driveId);
+      const excelData = await uploadCandidate(fileData, driveId);
       console.log(excelData);
     } else {
       throw new Error("Upload Students Data");
@@ -294,7 +288,7 @@ export async function stopDrive(request: FastifyRequest, reply: FastifyReply) {
     // let roundId = await redis.get(`driveId:${driveId}`);
     let round = 1;
     const results: any = await resultDao(round);
-// console.log(results);
+    // console.log(results);
     let response = await redis.del(`driveId:${driveId}`);
     const status = "completed";
     let roundStatus = await updateRoundStatus(driveId, round, status);
@@ -318,7 +312,7 @@ export async function stopDrive(request: FastifyRequest, reply: FastifyReply) {
 
 export async function updateDriveHandler(request: any, reply: FastifyReply) {
   try {
-    const driveId = request.params.id // Assuming you have a parameter for identifying the drive to update
+    const driveId = request.params.id; // Assuming you have a parameter for identifying the drive to update
     const data: any = {}; // Initialize data object to store form data
 
     let excelExists = false;
@@ -336,21 +330,46 @@ export async function updateDriveHandler(request: any, reply: FastifyReply) {
     }
 
     // Assuming your form data contains fields similar to addDrive function
-    const { hiringYear, totalQuestions, driveDate, collegeName, recruitmentTeam, jobRoles, duration, roundName, skip, questionData }: any = data;
+    const {
+      hiringYear,
+      totalQuestions,
+      driveDate,
+      collegeName,
+      recruitmentTeam,
+      jobRoles,
+      duration,
+      roundName,
+      skip,
+      questionData,
+    }: any = data;
     console.log("Edit Drive ------>>>>> ", data);
     // Your validation and processing logic here...
 
     // Call the update drive function with necessary parameters
-    const response = await updateDrive(+driveId, hiringYear[0], driveDate, collegeName, recruitmentTeam, jobRoles, duration, roundName, skip, totalQuestions, questionData);
+    const response = await updateDrive(
+      +driveId,
+      hiringYear[0],
+      driveDate,
+      collegeName,
+      recruitmentTeam,
+      jobRoles,
+      duration,
+      roundName,
+      skip,
+      totalQuestions,
+      questionData
+    );
 
     // Handle uploading excel file if it exists
     if (excelExists) {
-      const excelData = await uploadCandidate(fileData,driveId);
+      const excelData = await uploadCandidate(fileData, driveId);
       console.log(excelData);
     }
 
     // Send success response
-    reply.code(200).send({ status: true, message: "Drive Updated" , data : response});
+    reply
+      .code(200)
+      .send({ status: true, message: "Drive Updated", data: response });
   } catch (error) {
     console.log("Error in updateDriveHandler: ", error);
     reply.code(500).send({ status: false, message: error.message });
@@ -359,12 +378,18 @@ export async function updateDriveHandler(request: any, reply: FastifyReply) {
 
 export async function getDriveByIdHandler(request: any, reply: FastifyReply) {
   try {
-    const driveId = request.params.id // 
+    const driveId = request.params.id; //
     // Call the controller function to get the drive information by ID
-    const drive = await getDriveById(+driveId);
+    const response = await getDriveById(+driveId);
 
     // Send the retrieved drive information as a response
-    reply.code(200).send({ status: true, data: transformDriveResponse(drive) });
+    reply.code(200).send({
+      status: true,
+      data: {
+        driveData: transformDriveResponse(response?.drive),
+        resultFormat: response?.transformedResults,
+      },
+    });
   } catch (error) {
     console.log("Error in getDriveByIdHandler: ", error);
     reply.code(500).send({ status: false, message: error.message });

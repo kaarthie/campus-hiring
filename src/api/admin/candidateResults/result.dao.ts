@@ -301,7 +301,8 @@ export async function driveResults(
     });
     console.log(loginAttemptsCount);
     let notstarted = 0;
-    // console.log(notStartedTestCount - loginAttemptsCount);
+    
+
     return {
       results: results,
       loginAttemptsCount: loginAttemptsCount,

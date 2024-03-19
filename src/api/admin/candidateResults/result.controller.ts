@@ -161,7 +161,7 @@ export async function filteredDownload(
     if (report) {
       reply.code(200).send({
         status: true,
-        excelLink: report?.excelLink || '',
+        excelLink: report?.excelLink || "",
       });
     } else {
       reply.code(404).send({
