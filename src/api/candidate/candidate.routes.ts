@@ -89,7 +89,6 @@ const candidateRoutes: IRouteOptions<{
   },
   {
     url: "/slug",
-    preHandler: [jwtVerification],
     handler: verifySlug,
     method: API_METHODS.POST,
   },
