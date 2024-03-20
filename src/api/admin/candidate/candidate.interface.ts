@@ -21,5 +21,5 @@ export interface ICandidateDetailsCollege {
   mobileNumber?: string | null;
   email?: string | null;
   address?: string | null;
-  driveId: number;
+  driveName: string;
 }

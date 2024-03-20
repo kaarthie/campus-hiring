@@ -12,6 +12,7 @@ import {
   getDrive,
   updateDrive,
   getDriveById,
+  getCollegeNameDao,
 } from "./drive.dao";
 import {
   campusParams,
@@ -397,6 +398,27 @@ export async function getDriveByIdHandler(request: any, reply: FastifyReply) {
     });
   } catch (error) {
     console.log("Error in getDriveByIdHandler: ", error);
+    reply.code(500).send({ status: false, message: error.message });
+  }
+}
+
+export async function getCollegeName(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const driveName: string = (request.body as any).driveName;
+    let response: any = await getCollegeNameDao(driveName);
+
+    response = response?.map((data) => {
+      return data?.college;
+    });
+
+    reply
+      .code(200)
+      .send({ status: true, message: "Here are the results", data: response });
+  } catch (error) {
+    console.log("Error in getCollegeName() ->", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }

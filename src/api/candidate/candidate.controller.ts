@@ -30,7 +30,7 @@ export async function getCampusDetails(
   reply: FastifyReply
 ) {
   try {
-    let campusId = 1; // updated according to the admin's requirement
+    let campusId = 2; // updated according to the admin's requirement
     const response = await campusYear(campusId);
     // const response1 = await getCollegeDao();
     reply.code(200).send({ status: true, campusYear: response?.campusYear });
@@ -46,12 +46,14 @@ export async function candidateAnswer(
 ) {
   try {
     const questionId = Number(request.params.id);
-    const { answer, round, nextQuestionId } = request.body as candidateAnswer;
+    const { answer, round, nextQuestionId, timeStamp } =
+      request.body as candidateAnswer;
     const response = await storeAnswerDao(
       questionId,
       request.user.studentId,
       answer,
-      round
+      round,
+      timeStamp
     );
     // const storeTime = await storeCandidateTime(request.user.studentId);
     if (nextQuestionId) {

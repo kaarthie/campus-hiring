@@ -14,6 +14,7 @@ import {
   getUpcomingDrive,
   updateDriveHandler,
   getDriveByIdHandler,
+  getCollegeName,
 } from "./drive.controller";
 
 const driveRoutes: IRouteOptions<{
@@ -86,6 +87,12 @@ const driveRoutes: IRouteOptions<{
     handler: getDriveByIdHandler,
     preHandler: [jwtAdminVerification],
     method: API_METHODS.GET,
+  },
+  {
+    url: "/getCollegeName",
+    handler: getCollegeName,
+    preHandler: [jwtAdminVerification],
+    method: API_METHODS.POST,
   },
 ];
 

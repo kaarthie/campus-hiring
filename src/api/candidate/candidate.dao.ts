@@ -34,7 +34,13 @@ export async function campusYear(id: number) {
   }
 }
 
-export async function storeAnswerDao(questionId, studentId, userAnswer, round) {
+export async function storeAnswerDao(
+  questionId,
+  studentId,
+  userAnswer,
+  round,
+  timeStamp
+) {
   // console.log("hi", userAnswer)
   try {
     const answer = await prisma.drive.findFirst({
@@ -61,6 +67,7 @@ export async function storeAnswerDao(questionId, studentId, userAnswer, round) {
         },
         data: {
           answer: userAnswer,
+          timeStamp: timeStamp,
         },
       });
       return true;
@@ -73,6 +80,7 @@ export async function storeAnswerDao(questionId, studentId, userAnswer, round) {
           candidateId: studentId,
           answer: userAnswer,
           roundId: +round,
+          timeStamp: timeStamp,
         },
       });
       return true;

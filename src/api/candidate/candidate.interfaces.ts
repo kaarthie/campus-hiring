@@ -1,30 +1,31 @@
 export interface newCandidate {
-    driveId: number
-    candidateName: string
-    mobileNumber: string
-    registerNumber: string
-    email: string
-    college: string
-    department: string
+  driveId: number;
+  candidateName: string;
+  mobileNumber: string;
+  registerNumber: string;
+  email: string;
+  college: string;
+  department: string;
 }
 
 export interface candidateTracking {
-    startTime: String,
-    loginAttempts?: Number,
-    roundOneDurationTaken?: Number,
-    roundtwoDurationTaken?: Number
+  startTime: String;
+  loginAttempts?: Number;
+  roundOneDurationTaken?: Number;
+  roundtwoDurationTaken?: Number;
 }
 
 export interface answerParams {
-    id: string;
+  id: string;
 }
 
 export interface candidateAnswer {
-    answer: string,
-    round: number,
-    nextQuestionId: object
+  answer: string;
+  round: number;
+  nextQuestionId: object;
+  timeStamp: string;
 }
 
 export interface QueryParameters {
-    id: string; // Assuming 'param1' is a string in the query
+  id: string; // Assuming 'param1' is a string in the query
 }

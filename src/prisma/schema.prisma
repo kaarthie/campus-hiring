@@ -49,8 +49,8 @@ model slugDetails {
 
 model college {
   driveId   Int    @unique
-  driveName   String @db.VarChar(70)
-  id Int    @id @default(autoincrement())
+  driveName String @db.VarChar(70) @unique
+  id        Int    @id @default(autoincrement())
   drive     Drive  @relation(fields: [driveId], references: [driveId])
 
   @@map("college_details")
@@ -58,10 +58,10 @@ model college {
 
 model CandidateTracking {
   driveId               Int
-  studentId             Int
+  studentId             Int                     @unique
   round                 Int
   startTime             String
-  loginAttempts         Int?                    @default(0)
+  loginAttempts         Boolean                 @default(false)
   roundOneDurationTaken String?                 @default("0")
   drive                 Drive                   @relation(fields: [driveId], references: [driveId])
   student               CandidateDetailsCollege @relation(fields: [studentId], references: [studentId])
@@ -89,14 +89,16 @@ model Mcqs {
 }
 
 model Answers {
-  answerId    Int     @id @unique @default(autoincrement())
+  answerId    Int      @id @unique @default(autoincrement())
   driveId     Int
   roundId     Int
   questionId  Int
   candidateId Int
   answer      String?
-  drive       Drive   @relation(fields: [driveId], references: [driveId])
-  question    Mcqs    @relation(fields: [questionId], references: [id])
+  timeStamp   String
+  createdAt   DateTime @default(now())
+  drive       Drive    @relation(fields: [driveId], references: [driveId])
+  question    Mcqs     @relation(fields: [questionId], references: [id])
 }
 
 model tabSwitch {
@@ -150,7 +152,7 @@ model CandidateDetailsCollege {
   arrearStatus         String?
   arrearCount          Int?
   mobileNumber         String?
-  email                String?
+  email                String
   address              String?
   driveId              Int
   drive                Drive                  @relation(fields: [driveId], references: [driveId])

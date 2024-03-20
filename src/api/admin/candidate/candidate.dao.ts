@@ -1,8 +1,10 @@
+import { Prisma } from "@prisma/client";
+import redis from "../../../config/redis";
 import prisma from "../../../utils/prisma";
 import { ICandidateDetailsCollege } from "./candidate.interface";
 
 export async function createCandidate({
-  driveId,
+  driveName,
   registerNumber,
   name,
   college,
@@ -26,11 +28,14 @@ export async function createCandidate({
   email,
   address,
 }) {
-  console.log(driveId, ":HERE");
+  console.log(driveName, ":HERE");
   try {
+    const driveData = await prisma.college.findUnique({
+      where: { driveName: driveName },
+    });
     const response = await prisma.candidateDetailsCollege.create({
       data: {
-        driveId: +driveId,
+        driveId: driveData.driveId,
         registerNumber: registerNumber,
         name: name,
         college: college,
@@ -73,13 +78,14 @@ export async function createCandidate({
           ? null
           : parseInt(arrearCount as string),
         mobileNumber: mobileNumber,
-        email: email,
+        email: email.length > 0 ? email : null,
         address: address,
       },
     });
     return response;
   } catch (error) {
     console.log("Error in createCandidate:", error);
+    throw error;
   }
 }
 
@@ -130,6 +136,10 @@ export async function candidateStatusDao(driveId: number) {
           where: { candidateId: data?.studentId },
         });
 
+        const candidateTrackData = await prisma.candidateTracking.findFirst({
+          where: { studentId: data?.studentId },
+        });
+
         if (testAttendedData) {
           testAttended = true;
         }
@@ -139,6 +149,7 @@ export async function candidateStatusDao(driveId: number) {
         }
 
         return {
+          "lock status": candidateTrackData?.loginAttempts || false,
           ...data,
           testAttended,
           testSubmitted,
@@ -150,5 +161,34 @@ export async function candidateStatusDao(driveId: number) {
     return { candidatesData: candidatesWithStatus };
   } catch (error) {
     console.log("Error in candidateStatusDao() ->", error);
+  }
+}
+
+export async function unlockCandidateDao(
+  candidateId: number,
+  timeStamp?: string
+) {
+  console.log(candidateId, "CHECK");
+  try {
+    const response = await prisma.candidateTracking.update({
+      where: { studentId: candidateId },
+      data: { loginAttempts: false },
+    });
+    const answerData = await prisma.answers.findMany({
+      where: { candidateId: candidateId },
+      orderBy: {
+        createdAt: Prisma.SortOrder.desc,
+      },
+    });
+    if (answerData && !timeStamp) {
+      const timeStamp = answerData[0]?.timeStamp;
+      await redis.set(`${candidateId}`, `${timeStamp}`);
+    } else {
+      await redis.set(`${candidateId}`, `${timeStamp}`);
+    }
+    return response;
+  } catch (error) {
+    console.log("Error in unlockCandidateDao() ->", error);
+    return error;
   }
 }

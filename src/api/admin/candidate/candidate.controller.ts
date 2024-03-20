@@ -1,5 +1,9 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { candidateStatusDao, createCandidate } from "./candidate.dao";
+import {
+  candidateStatusDao,
+  createCandidate,
+  unlockCandidateDao,
+} from "./candidate.dao";
 import { ICandidateDetailsCollege } from "./candidate.interface";
 
 export async function addNewCandidate(
@@ -8,7 +12,7 @@ export async function addNewCandidate(
 ) {
   try {
     const {
-      driveId,
+      driveName,
       registerNumber,
       name,
       college,
@@ -34,7 +38,7 @@ export async function addNewCandidate(
     } = request.body as ICandidateDetailsCollege;
 
     const response = await createCandidate({
-      driveId,
+      driveName,
       registerNumber,
       name,
       college,
@@ -87,6 +91,26 @@ export async function candidateStatus(
     });
   } catch (error) {
     console.log("Error in candidateStatus() ->", error);
+    reply.code(500).send({
+      status: false,
+      message: error.message,
+    });
+  }
+}
+
+export async function unlockCandidate(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const { candidateId, timeStamp }: any = request.body;
+    await unlockCandidateDao(candidateId, timeStamp);
+    reply.code(200).send({
+      status: true,
+      message: "The candidate has been unlocked",
+    });
+  } catch (error) {
+    console.log("Error in unlockCandidate() ->", error);
     reply.code(500).send({
       status: false,
       message: error.message,

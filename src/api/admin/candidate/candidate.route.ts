@@ -1,6 +1,6 @@
 import { API_METHODS } from "../../../interface/api.interface";
 import { IRouteOptions } from "../../../interface/fastify.interface";
-import { addNewCandidate, candidateStatus } from "./candidate.controller";
+import { addNewCandidate, candidateStatus, unlockCandidate } from "./candidate.controller";
 import { jwtAdminVerification } from "../../../preHandlers/preAdminAuth";
 
 const candidateRoutes: IRouteOptions<{
@@ -19,6 +19,12 @@ const candidateRoutes: IRouteOptions<{
     handler: candidateStatus,
     preHandler: [jwtAdminVerification],
     method: API_METHODS.GET,
+  },
+  {
+    url: "/unlockCandidate",
+    handler: unlockCandidate,
+    preHandler: [jwtAdminVerification],
+    method: API_METHODS.POST,
   },
 ];
 

@@ -163,7 +163,7 @@ export async function getQuestionDetails() {
           acc[topic] = {
             easy: 0,
             medium: 0,
-            hard: 0
+            hard: 0,
           };
         }
 
@@ -174,11 +174,9 @@ export async function getQuestionDetails() {
     }, {});
     return result;
   } catch (error) {
-    console.log("Error in getQuestionDetails:", error);;
+    console.log("Error in getQuestionDetails:", error);
   }
 }
-
-
 
 export async function getAdminQuestionSet() {
   try {

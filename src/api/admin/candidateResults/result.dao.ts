@@ -191,7 +191,7 @@ export async function getDrives() {
         },
         college: {
           select: {
-            college: true,
+            driveName: true,
           },
         },
       },

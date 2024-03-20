@@ -1,7 +1,12 @@
 import { OAuth2Client } from "google-auth-library";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { auth } from "./auth.interface";
-import { checkCandidate } from "./auth.dao";
+import {
+  candidateTrack,
+  checkCandidate,
+  createCandidateTrack,
+  updateCandidateTrack,
+} from "./auth.dao";
 import jwt from "jsonwebtoken";
 
 const oauth2Client = new OAuth2Client({
@@ -21,7 +26,16 @@ export async function verifyCandidate(
     // const email = accessToken;
     console.log("email-->", email);
     const response = await checkCandidate(`${email}`);
-    console.log("response-->", response);
+    const studentId: number = response ? response?.studentId : 0;
+    const candidateTrackData = await candidateTrack(studentId);
+    const attempts = candidateTrackData ? candidateTrackData?.loginAttempts : "create";
+    if (attempts === true) {
+      throw new Error("User logged in elsewhere");
+    } else if (!attempts) {
+      await updateCandidateTrack(studentId);
+    } else if(attempts==="create") {
+      await createCandidateTrack(studentId);
+    }
     if (response) {
       const payload = {
         registerNumber: response.registerNumber,
@@ -38,12 +52,13 @@ export async function verifyCandidate(
         .code(200)
         .send({ status: true, token: token, message: "user Verified" });
     } else {
-      reply
-        .code(404)
-        .send({ status: false, message: "user does not exist in the database" });
+      reply.code(404).send({
+        status: false,
+        message: "user does not exist in the database",
+      });
     }
   } catch (error) {
     console.log("Error in verifyCandidate: ", error);
-    reply.code(500).send({ status: true, message: error.message });
+    reply.code(500).send({ status: false, message: error.message });
   }
 }

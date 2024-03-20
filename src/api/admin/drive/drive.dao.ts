@@ -1,6 +1,7 @@
 import { includes, map } from "lodash";
 import prisma from "../../../utils/prisma";
 import fastifyMulter from "fastify-multer";
+import { Prisma } from "@prisma/client";
 // import { storage } from "../../../services/multerStorage";
 
 export async function getDriveDetails() {
@@ -50,13 +51,13 @@ export async function getDrive() {
       where: {
         NOT: { driveStatus: "completed" },
       },
-      include : {
-        college : {
-          select : {
-            driveName : true
-          }
-        }
-      }
+      include: {
+        college: {
+          select: {
+            driveName: true,
+          },
+        },
+      },
     });
     console.log("Drive data --> ", driveData);
     const driveIds = driveData.map((data) => {
@@ -352,9 +353,9 @@ export async function getDriveById(driveId) {
       },
       include: {
         college: {
-          select : {
-            driveName : true
-          }
+          select: {
+            driveName: true,
+          },
         },
         jobRoles: true,
         RoundPrivileges: true,
@@ -376,9 +377,12 @@ export async function getDriveById(driveId) {
           0
         );
         transformedResults[`${topic.toUpperCase()} Overall`] = overall;
-        transformedResults[`${topic.toUpperCase()} Easy`] = resultsFormat[topic].easy || 0;
-        transformedResults[`${topic.toUpperCase()} Medium`] = resultsFormat[topic].medium || 0;
-        transformedResults[`${topic.toUpperCase()} Hard`] = resultsFormat[topic].hard || 0;
+        transformedResults[`${topic.toUpperCase()} Easy`] =
+          resultsFormat[topic].easy || 0;
+        transformedResults[`${topic.toUpperCase()} Medium`] =
+          resultsFormat[topic].medium || 0;
+        transformedResults[`${topic.toUpperCase()} Hard`] =
+          resultsFormat[topic].hard || 0;
       });
     }
 
@@ -466,5 +470,23 @@ export async function updateDrive(
     return updatedDrive;
   } catch (error) {
     console.log("Error in updateDrive:", error);
+  }
+}
+
+export async function getCollegeNameDao(driveName: string) {
+  try {
+    const driveData = await prisma.college.findFirst({
+      where: { driveName: driveName },
+    });
+
+    const collegeNames = await prisma.candidateDetailsCollege.groupBy({
+      by: ["college"],
+      where: {
+        driveId: driveData?.driveId,
+      },
+    });
+    return collegeNames;
+  } catch (error) {
+    console.log("Error in getCollegeNameDao() ->", error);
   }
 }

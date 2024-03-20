@@ -10,7 +10,7 @@ export async function getMembers() {
   }
 }
 
-export async function addMember(name, email, position) {
+export async function addMember(name, email, position, addedBy) {
   try {
     const existingMember = await prisma.recruitmentTeamMembers.findFirst({
       where: {
@@ -30,6 +30,7 @@ export async function addMember(name, email, position) {
         name,
         email,
         position,
+        addedBy,
       },
     });
 
@@ -64,7 +65,6 @@ export async function deleteMember(id) {
 
 export async function updateTeamMember(id, name, email, position) {
   try {
-
     const existingMember = await prisma.recruitmentTeamMembers.findFirst({
       where: {
         id: id,
@@ -118,4 +118,15 @@ export async function updateTeamMember(id, name, email, position) {
   //     // return error;
   //     console.log(error);
   // }
+}
+
+export async function checkSuperAdminDao(email: string) {
+  try {
+    const teamMemberData = await prisma.recruitmentTeamMembers.findFirst({
+      where: { email },
+    });
+    return teamMemberData?.position?.toLowerCase() === "superadmin";
+  } catch (error) {
+    console.log("Error in checkSuperAdminDao() ->", error);
+  }
 }

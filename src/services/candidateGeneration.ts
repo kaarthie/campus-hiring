@@ -50,7 +50,6 @@ export const uploadCandidate = async (fileStream,id) => {
 
         const driveId = id;
         if (driveId) {
-          console.log(driveId,"kandu")
           const {
             registerNumber,
             name,
