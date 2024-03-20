@@ -288,26 +288,25 @@ export async function driveResults({
         driveId: Number(driveId),
       },
     });
-    const loginAttemptsCount = await prisma.candidateTracking.count({
-      where: {
-        driveId: Number(driveId),
-        loginAttempts: {
-          gte: 1,
-        },
-      },
-    });
+    // const loginAttemptsCount = await prisma.candidateTracking.count({
+    //   where: {
+    //     driveId: Number(driveId),
+    //     loginAttempts: {
+    //       gte: 1,
+    //     },
+    //   },
+    // });
     const submittedTestCount = await prisma.submitTest.count({
       where: {
         driveId: Number(driveId),
         submitted: true,
       },
     });
-    console.log(loginAttemptsCount);
+    // console.log(loginAttemptsCount);
     let notstarted = 0;
 
     return {
       results: results,
-      loginAttemptsCount: loginAttemptsCount,
       submittedTestCount: submittedTestCount,
       notstarted: notstarted,
       overallStudentCount: results.length,

@@ -168,7 +168,7 @@ export async function driveInstructions() {
     //   instructions = [...generalInstructions, newInstruction];
     // }
     // console.log(privileges?.RoundPrivileges?.IsSkipped);
-    if (!privileges?.RoundPrivileges?.IsSkipped) {
+    if (privileges?.RoundPrivileges?.IsSkipped) {
       let newInstruction =
         "You cannot be able to skip the questions without answering them.";
       generalInstructions = [
@@ -522,5 +522,21 @@ export async function createTabCount(tabCount, candidateId) {
     return response;
   } catch (error) {
     console.log("Error in createCandidate:", error);
+  }
+}
+
+export async function createInitialTabSwitch(candidateId: number) {
+  try {
+    const tabswitchData = await prisma.tabSwitch.findFirst({
+      where: { candidateId: candidateId },
+    });
+    if (!tabswitchData) {
+      await prisma.tabSwitch.create({
+        data: { tabCount: 0, candidateId: candidateId },
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    throw Error;
   }
 }

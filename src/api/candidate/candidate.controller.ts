@@ -12,6 +12,7 @@ import {
   checkSubmitted,
   createTabCount,
   verifySlugDao,
+  createInitialTabSwitch,
 } from "./candidate.dao";
 import redis from "../../config/redis";
 import {
@@ -95,7 +96,7 @@ export async function candidateInstructions(
     console.log("Submitted", submitted);
     const loginAttemptsByCandidate = attempts.attempts;
     const round = Number(attempts.round);
-    let driveObj = {};
+    let driveObj:any = {};
     if (round) {
       driveObj = {
         driveStatus: true,
@@ -148,6 +149,7 @@ export async function getQuestion(
     const { questionid }: any = request.body as { id: number };
     // const mcq = (await redis).get(`${questionId.questionId}`);
     console.log("Question--------", questionid);
+    
     const mcq = await getMcq(questionid);
     if (mcq) {
       console.log(mcq);
@@ -176,7 +178,7 @@ export async function timeTakenByCandidate(
     if (time) {
       await redis.set(`${studentId}`, `${time}`);
       let round = await redis.get(`driveId:${driveId}`);
-      let driveObj = {};
+      let driveObj:any = {};
       if (round) {
         driveObj = {
           driveStatus: true,
@@ -224,6 +226,7 @@ export async function getCandidateprivileges(
     const roundDetails = await getRound();
     // console.log(roundDetails);
     const studentId = request.user.studentId;
+    const tabSwitch = await createInitialTabSwitch(studentId);
     const candidateQuestionSet = await getcandidateQuestionSet(studentId);
     const response = await trackCandidateDao(startTime, studentId);
     console.log(response, "FIND");
