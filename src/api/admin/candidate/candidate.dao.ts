@@ -27,10 +27,10 @@ export async function createCandidate({
   mobileNumber,
   email,
   address,
-}) {
+}: any) {
   console.log(driveName, ":HERE");
   try {
-    const driveData = await prisma.college.findUnique({
+    const driveData: any = await prisma.college.findUnique({
       where: { driveName: driveName },
     });
     const response = await prisma.candidateDetailsCollege.create({
@@ -90,7 +90,7 @@ export async function createCandidate({
 }
 
 // Function to fetch candidate details
-export async function getCandidateDetailsForExcel(studentId) {
+export async function getCandidateDetailsForExcel(studentId: any) {
   try {
     // Query the database for candidate details
     const candidate = await prisma.candidateDetailsCollege.findUnique({
@@ -120,7 +120,7 @@ export async function candidateStatusDao(driveId: number) {
     });
 
     const candidatesWithStatus = await Promise.all(
-      candidatesData.map(async (data) => {
+      candidatesData.map(async (data: { studentId: any }) => {
         let testAttended = false;
         let testSubmitted = false;
 
@@ -177,7 +177,7 @@ export async function unlockCandidateDao(
     const answerData = await prisma.answers.findMany({
       where: { candidateId: candidateId },
       orderBy: {
-        createdAt: Prisma.SortOrder.desc,
+        createdAt: "desc",
       },
     });
     if (answerData && !timeStamp) {

@@ -1,6 +1,6 @@
 import server from "./app";
-import dotenv from "dotenv";
-import path from "path";
+import * as dotenv from "dotenv";
+import * as path from "path";
 
 const envPath = path.resolve(__dirname, "./.env");
 const result = dotenv.config({ path: envPath });

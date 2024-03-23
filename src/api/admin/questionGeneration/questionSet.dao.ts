@@ -2,6 +2,7 @@ import prisma from "../../../utils/prisma";
 import { Prisma } from "@prisma/client";
 const { sql } = require("@prisma/client");
 import redis from "../../../config/redis";
+import { shuffleArray } from "../../../utils/utils";
 
 // export async function generateQuestion() {
 //   console.log("Inside Question set generation");
@@ -119,11 +120,17 @@ export async function generateQuestion() {
           const diffLevel = questionData[topic];
           for (const level in diffLevel) {
             const noOfQuestions = diffLevel[level];
-            const query = `SELECT * FROM Mcqs WHERE topic='${topic}' AND difficultLevel='${level}' ORDER BY RAND() LIMIT ${noOfQuestions}`;
-            const response: string[] = await prisma.$queryRaw(
-              Prisma.raw(query)
-            );
-            questions.push(...response);
+            // const query = `SELECT * FROM Mcqs WHERE topic='${topic}' AND difficultLevel='${level}' ORDER BY RAND() LIMIT ${noOfQuestions}`;
+            // const response: any = await prisma.$queryRaw(Prisma.raw(query));
+            let fetchedQuestions = await prisma.mcqs.findMany({
+              where: {
+                AND: [{ topic: topic }, { difficultLevel: level }],
+              },
+              take: noOfQuestions,
+            });
+            shuffleArray(fetchedQuestions);
+            questions.push(...fetchedQuestions);
+            // questions.push(...response);
           }
         }
         for (const question of questions) {
@@ -155,7 +162,7 @@ export async function getQuestionDetails() {
   try {
     const mcqData = await prisma.mcqs.findMany();
 
-    const result = mcqData.reduce((acc, curr) => {
+    const result = mcqData.reduce((acc: any, curr: any) => {
       const { difficultLevel, topic } = curr;
 
       if (difficultLevel && topic) {
@@ -195,7 +202,7 @@ export async function getAdminQuestionSet() {
     });
     if (questions) {
       const questionIds = questions.questionSet.map(
-        (question) => question.questionId
+        (question: { questionId: any }) => question.questionId
       );
       const fetchedQuestions = await prisma.mcqs.findMany({
         where: {

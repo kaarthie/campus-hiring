@@ -35,16 +35,13 @@ export async function getCampusDetails(
     const response = await campusYear(campusId);
     // const response1 = await getCollegeDao();
     reply.code(200).send({ status: true, campusYear: response?.campusYear });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getCampusDetails: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }
 
-export async function candidateAnswer(
-  request: FastifyRequest<{ Params: answerParams }>,
-  reply: FastifyReply
-) {
+export async function candidateAnswer(request: any, reply: FastifyReply) {
   try {
     const questionId = Number(request.params.id);
     const { answer, round, nextQuestionId, timeStamp } =
@@ -77,16 +74,13 @@ export async function candidateAnswer(
           .send({ status: false, message: "Couldn't store answer" });
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in candidateAnswer: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }
 
-export async function candidateInstructions(
-  request: FastifyRequest<{ Params: answerParams }>,
-  reply: FastifyReply
-) {
+export async function candidateInstructions(request: any, reply: FastifyReply) {
   try {
     const studentId = request.user.studentId;
     const instructions = await driveInstructions();
@@ -96,7 +90,7 @@ export async function candidateInstructions(
     console.log("Submitted", submitted);
     const loginAttemptsByCandidate = attempts.attempts;
     const round = Number(attempts.round);
-    let driveObj:any = {};
+    let driveObj: any = {};
     if (round) {
       driveObj = {
         driveStatus: true,
@@ -134,7 +128,7 @@ export async function candidateInstructions(
         message: "You've already submitted the test!",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in candidateInstructions: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -149,7 +143,7 @@ export async function getQuestion(
     const { questionid }: any = request.body as { id: number };
     // const mcq = (await redis).get(`${questionId.questionId}`);
     console.log("Question--------", questionid);
-    
+
     const mcq = await getMcq(questionid);
     if (mcq) {
       console.log(mcq);
@@ -160,16 +154,13 @@ export async function getQuestion(
         .code(404)
         .send({ status: false, message: "No questions available" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getQuestion: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }
 
-export async function timeTakenByCandidate(
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
+export async function timeTakenByCandidate(request: any, reply: FastifyReply) {
   try {
     const { time, driveId } = request.body as { time: object; driveId: Number };
     const studentId = request.user.studentId;
@@ -178,7 +169,7 @@ export async function timeTakenByCandidate(
     if (time) {
       await redis.set(`${studentId}`, `${time}`);
       let round = await redis.get(`driveId:${driveId}`);
-      let driveObj:any = {};
+      let driveObj: any = {};
       if (round) {
         driveObj = {
           driveStatus: true,
@@ -200,14 +191,14 @@ export async function timeTakenByCandidate(
         .code(401)
         .send({ status: false, message: "error in storing the time" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in timeTakenByCandidate: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }
 
 export async function getCandidateprivileges(
-  request: FastifyRequest,
+  request: any,
   reply: FastifyReply
 ) {
   try {
@@ -228,7 +219,7 @@ export async function getCandidateprivileges(
     const studentId = request.user.studentId;
     const tabSwitch = await createInitialTabSwitch(studentId);
     const candidateQuestionSet = await getcandidateQuestionSet(studentId);
-    const response = await trackCandidateDao(startTime, studentId);
+    const response = await trackCandidateDao(studentId);
     console.log(response, "FIND");
     const lastAttemptedQuestion = await lastAnsweredQuestion(studentId);
     if (roundPrivileges || roundDetails || candidateQuestionSet || response) {
@@ -241,6 +232,18 @@ export async function getCandidateprivileges(
         candidateQuestionSet: candidateQuestionSet,
         lastAttemptedQuestion: lastAttemptedQuestion,
       });
+      console.log(
+        {
+          status: true,
+          candidateId: studentId,
+          roundPrivileges: roundPrivileges,
+          timeTakenByCandidate: response,
+          roundDetails: roundDetails,
+          candidateQuestionSet: candidateQuestionSet,
+          lastAttemptedQuestion: lastAttemptedQuestion,
+        },
+        "CHECKINPROD"
+      );
       reply.code(200).send({
         status: true,
         candidateId: studentId,
@@ -255,16 +258,13 @@ export async function getCandidateprivileges(
         .code(403)
         .send({ status: false, message: "error in getting the privileges" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getCandidatePrevileges: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }
 
-export async function submitTest(
-  request: FastifyRequest<{ Params: QueryParameters }>,
-  reply: FastifyReply
-) {
+export async function submitTest(request: any, reply: FastifyReply) {
   try {
     // const queryParams = request.query as QueryParameters;
     const booleanParam = request.params.id.trim() === "true";
@@ -285,7 +285,7 @@ export async function submitTest(
         .code(403)
         .send({ status: false, message: "error in submitting the test" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in submitTest: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -303,7 +303,7 @@ export async function addNewTabCount(
       message: "Successfully created",
       data: response,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in addNewTabCount: ", error);
     reply.code(500).send({
       status: false,
@@ -325,7 +325,7 @@ export async function verifySlug(request: FastifyRequest, reply: FastifyReply) {
         .code(404)
         .send({ status: false, message: "Slug is not verfied, No content" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in verifySlug() ->", error);
     reply.code(500).send({ status: false, message: error.message });
   }

@@ -68,7 +68,7 @@ export async function addNewCandidate(
       message: "Successfully created",
       data: response,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in addNewCandidate: ", error);
     reply.code(500).send({
       status: false,
@@ -89,7 +89,7 @@ export async function candidateStatus(
       message: "Here are the results",
       data: response,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in candidateStatus() ->", error);
     reply.code(500).send({
       status: false,
@@ -109,7 +109,7 @@ export async function unlockCandidate(
       status: true,
       message: "The candidate has been unlocked",
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in unlockCandidate() ->", error);
     reply.code(500).send({
       status: false,

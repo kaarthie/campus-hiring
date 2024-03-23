@@ -2,7 +2,7 @@ import { OAuth2Client } from "google-auth-library";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { auth } from "./auth.interface";
 import { checkAdmin, createAdmin } from "./auth.dao";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 
 const oauth2Client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
@@ -55,7 +55,7 @@ export async function verifyCandidate(
         message: "admin does not belong to the codingmart domain",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in verifyCandidate: ", error);
     reply.code(500).send({
       status: false,

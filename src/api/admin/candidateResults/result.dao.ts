@@ -5,7 +5,7 @@ import { includes } from "lodash";
 import { generateExcel, generateExcel2 } from "../../../utils/utils";
 import { Prisma } from "@prisma/client";
 
-export async function resultDao(roundId) {
+export async function resultDao(roundId: number) {
   try {
     const questions: any = await prisma.drive.findFirst({
       where: {
@@ -29,7 +29,9 @@ export async function resultDao(roundId) {
     }
 
     const totalQuestions = questions.questionSet;
-    const questionIds = totalQuestions.map((question) => question.questionId);
+    const questionIds = totalQuestions.map(
+      (question: { questionId: any }) => question.questionId
+    );
     const correctAnswers = await prisma.mcqs.findMany({
       where: {
         id: {
@@ -70,7 +72,7 @@ export async function resultDao(roundId) {
     }
 
     const groupedResponses = candidateResponses.Answer.reduce(
-      (acc, response) => {
+      (acc: any, response: any) => {
         const candidateId = response.candidateId;
         if (!acc[candidateId]) {
           acc[candidateId] = [];
@@ -84,7 +86,7 @@ export async function resultDao(roundId) {
     const resultsToCreate: any = [];
     const topicsToCreate: any = [];
     for (const candidateId in groupedResponses) {
-      const scores = {
+      const scores: any = {
         overall: 0,
         ds: { easy: 0, medium: 0, hard: 0 },
         sql: { easy: 0, medium: 0, hard: 0 },
@@ -95,7 +97,7 @@ export async function resultDao(roundId) {
       for (const response of candidateAnswers) {
         const questionId = response.questionId;
         const correctAnswer = correctAnswers.find(
-          (ans) => ans.id === questionId
+          (ans: { id: any }) => ans.id === questionId
         );
 
         if (correctAnswer && correctAnswer.answer === response.answer) {
@@ -159,7 +161,7 @@ export async function resultDao(roundId) {
   }
 }
 
-export async function resultDeletionDao(id) {
+export async function resultDeletionDao(id: any) {
   try {
     let response = await prisma.results.deleteMany({
       where: {
@@ -218,102 +220,71 @@ export async function driveResults({
   logicalE,
   logicalM,
   logicalH,
-}) {
+}: any) {
   try {
-    const query = `
-    SELECT 
-        r.*, 
-        s.name AS student_name,
-        tab.tabCount AS tab_count, 
-        s.registerNumber AS student_registerNumber, 
-        s.branch AS student_branch,
-        rd.roundTestConfig AS round_test_config,
-        ts.ds,
-        ts.sql,
-        ts.logical,
-        ts.ds_easy,
-        ts.ds_medium,
-        ts.ds_hard,
-        ts.sql_easy,
-        ts.sql_medium,
-        ts.sql_hard,
-        ts.logical_easy,
-        ts.logical_medium,
-        ts.logical_hard
-    FROM 
-        Results AS r
-    JOIN
-        round_details AS rd ON r.driveId = rd.driveId 
-    JOIN 
-        candidate_details_college AS s ON r.candidateId = s.studentId
-    JOIN 
-        topicScores AS ts ON r.candidateId = ts.candidateId
-    JOIN
-        tabSwitch AS tab ON r.candidateId = tab.candidateId
-    WHERE 
-        r.driveId = ${Number(driveId) || 0}
-        AND ${
-          Number(dsOverall)
-            ? `ts.ds >= ${Number(dsOverall)}`
-            : `(ts.ds_easy >= ${Number(dsE) || 0} AND ts.ds_medium >= ${
-                Number(dsM) || 0
-              } AND ts.ds_hard >= ${Number(dsH) || 0})`
-        }
-        AND ${
-          Number(sqlOverall)
-            ? `ts.sql >= ${Number(sqlOverall)}`
-            : `(ts.sql_easy >= ${Number(sqlE) || 0} AND ts.sql_medium >= ${
-                Number(sqlM) || 0
-              } AND ts.sql_hard >= ${Number(sqlH) || 0})`
-        }
-        AND ${
-          Number(logicalOverall)
-            ? `ts.logical >= ${Number(logicalOverall)}`
-            : `(ts.logical_easy >= ${
-                Number(logicalE) || 0
-              } AND ts.logical_medium >= ${
-                Number(logicalM) || 0
-              } AND ts.logical_hard >= ${Number(logicalH) || 0})`
-        }
-    ORDER BY 
-        r.score DESC;
-    `;
+    let whereCondition: any = {};
 
-    console.log(query);
+    if (dsOverall) {
+      whereCondition.ds = { gte: Number(dsOverall) };
+    } else if (!dsOverall && (dsE || dsH || dsM)) {
+      whereCondition.AND = [
+        { ds_easy: { gte: Number(dsE || 0) } },
+        { ds_medium: { gte: Number(dsM || 0) } },
+        { ds_hard: { gte: Number(dsH || 0) } },
+      ];
+    }
 
-    const results: any = await prisma.$queryRaw(Prisma.raw(query));
+    if (sqlOverall) {
+      whereCondition.sql = { gte: Number(sqlOverall) };
+    } else if (!sqlOverall && (sqlE || sqlH || sqlM)) {
+      whereCondition.AND = [
+        { sql_easy: { gte: Number(sqlE || 0) } },
+        { sql_medium: { gte: Number(sqlM || 0) } },
+        { sql_hard: { gte: Number(sqlH || 0) } },
+      ];
+    }
 
-    const notStartedTestCount = await prisma.candidateDetailsCollege.count({
-      where: {
-        driveId: Number(driveId),
+    if (logicalOverall) {
+      whereCondition.logical = { gte: Number(logicalOverall) };
+    } else if (!logicalOverall && (logicalE || logicalH || logicalM)) {
+      whereCondition.AND = [
+        { logical_easy: { gte: Number(logicalE || 0) } },
+        { logical_medium: { gte: Number(logicalM || 0) } },
+        { logical_hard: { gte: Number(logicalH || 0) } },
+      ];
+    }
+
+    const results: any = await prisma.results.findMany({
+      where: { driveId },
+      include: {
+        topicScores: {
+          where: whereCondition,
+        },
       },
     });
-    // const loginAttemptsCount = await prisma.candidateTracking.count({
-    //   where: {
-    //     driveId: Number(driveId),
-    //     loginAttempts: {
-    //       gte: 1,
-    //     },
-    //   },
-    // });
+
+    const finalResult = [];
+    results.map((data: any) => {
+      if (data.topicScores.length > 0) {
+        finalResult.push(data.topicScores[0]);
+      }
+    });
+
     const submittedTestCount = await prisma.submitTest.count({
       where: {
         driveId: Number(driveId),
         submitted: true,
       },
     });
-    // console.log(loginAttemptsCount);
+
     let notstarted = 0;
 
     return {
-      results: results,
+      results: finalResult,
       submittedTestCount: submittedTestCount,
       notstarted: notstarted,
       overallStudentCount: results.length,
     };
-
-    // console.log(results, loginAttemptsCount, submittedTestCount);
-    // return response;
   } catch (error) {
     console.log("Error in driveResults:", error);
   }
@@ -333,87 +304,156 @@ export async function filteredDownloadDao({
   logicalE,
   logicalM,
   logicalH,
-}) {
+}: any) {
   try {
-    const query = `
-    SELECT 
-        r.*, 
-        s.name AS student_name, 
-        tab.tabCount AS tab_count, 
-        s.registerNumber AS student_registerNumber, 
-        s.email AS student_email,
-        s.college AS student_college,
-        s.dateOfBirth AS student_dob,
-        s.gender AS student_gender,
-        s.mobileNumber AS student_mobile_no,
-        s.branch AS student_branch,
-        ts.ds,
-        ts.sql,
-        ts.logical,
-        ts.ds_easy,
-        ts.ds_medium,
-        ts.ds_hard,
-        ts.sql_easy,
-        ts.sql_medium,
-        ts.sql_hard,
-        ts.logical_easy,
-        ts.logical_medium,
-        ts.logical_hard
-    FROM 
-        Results AS r
-    JOIN 
-        candidate_details_college AS s ON r.candidateId = s.studentId
-    JOIN 
-        topicScores AS ts ON r.candidateId = ts.candidateId
-    JOIN
-        tabSwitch AS tab ON r.candidateId = tab.candidateId
-    WHERE 
-        r.driveId = ${Number(driveId) || 0}
-        AND ${
-          Number(dsOverall)
-            ? `ts.ds >= ${Number(dsOverall)}`
-            : `(ts.ds_easy >= ${Number(dsE) || 0} AND ts.ds_medium >= ${
-                Number(dsM) || 0
-              } AND ts.ds_hard >= ${Number(dsH) || 0})`
-        }
-        AND ${
-          Number(sqlOverall)
-            ? `ts.sql >= ${Number(sqlOverall)}`
-            : `(ts.sql_easy >= ${Number(sqlE) || 0} AND ts.sql_medium >= ${
-                Number(sqlM) || 0
-              } AND ts.sql_hard >= ${Number(sqlH) || 0})`
-        }
-        AND ${
-          Number(logicalOverall)
-            ? `ts.logical >= ${Number(logicalOverall)}`
-            : `(ts.logical_easy >= ${
-                Number(logicalE) || 0
-              } AND ts.logical_medium >= ${
-                Number(logicalM) || 0
-              } AND ts.logical_hard >= ${Number(logicalH) || 0})`
-        }
-    ORDER BY 
-        r.score DESC;
-    `;
+    // const query = `
+    // SELECT
+    //     r.*,
+    //     s.name AS student_name,
+    //     tab.tabCount AS tab_count,
+    //     s.registerNumber AS student_registerNumber,
+    //     s.email AS student_email,
+    //     s.college AS student_college,
+    //     s.dateOfBirth AS student_dob,
+    //     s.gender AS student_gender,
+    //     s.mobileNumber AS student_mobile_no,
+    //     s.branch AS student_branch,
+    //     ts.ds,
+    //     ts.sql,
+    //     ts.logical,
+    //     ts.ds_easy,
+    //     ts.ds_medium,
+    //     ts.ds_hard,
+    //     ts.sql_easy,
+    //     ts.sql_medium,
+    //     ts.sql_hard,
+    //     ts.logical_easy,
+    //     ts.logical_medium,
+    //     ts.logical_hard
+    // FROM
+    //     Results AS r
+    // JOIN
+    //     candidate_details_college AS s ON r.candidateId = s.studentId
+    // JOIN
+    //     topicScores AS ts ON r.candidateId = ts.candidateId
+    // JOIN
+    //     tabSwitch AS tab ON r.candidateId = tab.candidateId
+    // WHERE
+    //     r.driveId = ${Number(driveId) || 0}
+    //     AND ${
+    //       Number(dsOverall)
+    //         ? `ts.ds >= ${Number(dsOverall)}`
+    //         : `(ts.ds_easy >= ${Number(dsE) || 0} AND ts.ds_medium >= ${
+    //             Number(dsM) || 0
+    //           } AND ts.ds_hard >= ${Number(dsH) || 0})`
+    //     }
+    //     AND ${
+    //       Number(sqlOverall)
+    //         ? `ts.sql >= ${Number(sqlOverall)}`
+    //         : `(ts.sql_easy >= ${Number(sqlE) || 0} AND ts.sql_medium >= ${
+    //             Number(sqlM) || 0
+    //           } AND ts.sql_hard >= ${Number(sqlH) || 0})`
+    //     }
+    //     AND ${
+    //       Number(logicalOverall)
+    //         ? `ts.logical >= ${Number(logicalOverall)}`
+    //         : `(ts.logical_easy >= ${
+    //             Number(logicalE) || 0
+    //           } AND ts.logical_medium >= ${
+    //             Number(logicalM) || 0
+    //           } AND ts.logical_hard >= ${Number(logicalH) || 0})`
+    //     }
+    // ORDER BY
+    //     r.score DESC;
+    // `;
 
-    console.log(query);
+    // const results: any = await prisma.$queryRaw(Prisma.raw(query));
 
-    const results: any = await prisma.$queryRaw(Prisma.raw(query));
+    let whereCondition: any = {};
 
-    const Result = results.map((data) => ({
-      registerNumber: data?.student_registerNumber,
-      score: data?.score,
-      ds: data?.ds,
-      sql: data?.sql,
-      logical: data?.logical,
-      name: data?.student_name,
-      email: data?.student_email,
-      college: data?.student_college,
-      branch: data?.student_branch,
-      gender: data?.student_gender,
-      mobileNumber: data?.student_mobile_no,
-      tabSwitchCount: data?.tab_count,
-    }));
+    if (dsOverall) {
+      whereCondition.ds = { gte: Number(dsOverall) };
+    } else if (!dsOverall && (dsE || dsH || dsM)) {
+      whereCondition.AND = [
+        { ds_easy: { gte: Number(dsE || 0) } },
+        { ds_medium: { gte: Number(dsM || 0) } },
+        { ds_hard: { gte: Number(dsH || 0) } },
+      ];
+    }
+
+    if (sqlOverall) {
+      whereCondition.sql = { gte: Number(sqlOverall) };
+    } else if (!sqlOverall && (sqlE || sqlH || sqlM)) {
+      whereCondition.AND = [
+        { sql_easy: { gte: Number(sqlE || 0) } },
+        { sql_medium: { gte: Number(sqlM || 0) } },
+        { sql_hard: { gte: Number(sqlH || 0) } },
+      ];
+    }
+
+    if (logicalOverall) {
+      whereCondition.logical = { gte: Number(logicalOverall) };
+    } else if (!logicalOverall && (logicalE || logicalH || logicalM)) {
+      whereCondition.AND = [
+        { logical_easy: { gte: Number(logicalE || 0) } },
+        { logical_medium: { gte: Number(logicalM || 0) } },
+        { logical_hard: { gte: Number(logicalH || 0) } },
+      ];
+    }
+
+    const results: any = await prisma.results.findMany({
+      where: { driveId },
+      include: {
+        topicScores: {
+          where: whereCondition,
+        },
+      },
+    });
+
+    const finalResult = await Promise.all(
+      results.map(async (data: any) => {
+        if (data.topicScores.length > 0) {
+          const candidateDetails =
+            await prisma.candidateDetailsCollege.findFirst({
+              where: { studentId: data.topicScores[0]?.candidateId },
+              include: {
+                Results: { select: { score: true } },
+              },
+            });
+          const tabSwitch = await prisma.tabSwitch.findFirst({
+            where: { candidateId: data.topicScores[0]?.candidateId },
+            select: { tabCount: true },
+          });
+          console.log(candidateDetails, tabSwitch);
+          return {
+            candidateDetails,
+            tabSwitch,
+            ...data.topicScores[0],
+          };
+        }
+      })
+    );
+
+    const Result = [];
+    finalResult.map((data: any) => {
+      if (data) {
+        Result.push({
+          registerNumber: data?.candidateDetails?.registerNumber,
+          score: data?.candidateDetails?.Results[0]?.score,
+          ds: data?.ds,
+          sql: data?.sql,
+          logical: data?.logical,
+          name: data?.candidateDetails?.name,
+          email: data?.candidateDetails?.email,
+          college: data?.candidateDetails?.college,
+          branch: data?.candidateDetails?.branch,
+          gender: data?.candidateDetails?.gender,
+          mobileNumber: data?.candidateDetails?.mobileNumber,
+          tabSwitchCount: data?.tabSwitch?.tabCount,
+        });
+      }
+    });
+
     console.log(Result, "CHECKL");
 
     const DataLink = await generateExcel2(Result, driveId);
@@ -426,9 +466,9 @@ export async function filteredDownloadDao({
   }
 }
 
-export async function resultsWithScores(driveId, id) {
+export async function resultsWithScores(driveId: any, id: number) {
   try {
-    const groupedScore = await prisma.results.groupBy({
+    const groupedScore: any = await prisma.results.groupBy({
       by: ["score"],
       _count: true,
       orderBy: {
@@ -436,10 +476,11 @@ export async function resultsWithScores(driveId, id) {
       },
       where: {
         driveId: driveId,
-      },
-    } as any);
+      } as any,
+    });
+
     const candidateIdsByScore = await Promise.all(
-      groupedScore.map(async (result) => {
+      groupedScore.map(async (result: { score: any; _count: any }) => {
         const candidates = await prisma.results.findMany({
           where: {
             driveId: driveId.driveId,
@@ -460,7 +501,9 @@ export async function resultsWithScores(driveId, id) {
     console.log(id);
 
     const candidateIds = candidateIdsByScore.flatMap((entry) =>
-      entry.candidates.map((candidate) => candidate.candidateId)
+      entry.candidates.map(
+        (candidate: { candidateId: any }) => candidate.candidateId
+      )
     );
 
     // Fetch student details from another table
@@ -485,15 +528,17 @@ export async function resultsWithScores(driveId, id) {
 
     // Map student details into candidate objects
     const combinedData = candidateIdsByScore.map((entry) => {
-      const candidatesWithStudents = entry.candidates.map((candidate) => {
-        const student = students.find(
-          (s) => s.studentId === candidate.candidateId
-        );
-        return {
-          ...candidate,
-          ...student,
-        };
-      });
+      const candidatesWithStudents = entry.candidates.map(
+        (candidate: { candidateId: any }) => {
+          const student = students.find(
+            (s: any) => s.studentId === candidate.candidateId
+          );
+          return {
+            ...candidate,
+            ...student,
+          };
+        }
+      );
 
       return {
         ...entry,
@@ -515,5 +560,56 @@ export async function resultsWithScores(driveId, id) {
     }
   } catch (error) {
     console.log("Error in resultsWithScores:", error);
+  }
+}
+
+export async function topRankScoreDao(driveId: number) {
+  try {
+    const topScoreData: any = await prisma.results.findFirst({
+      where: { driveId: Number(driveId) },
+      orderBy: {
+        score: "desc",
+      },
+    });
+
+    const dsScore = await prisma.candidateDetailsCollege.findMany({
+      where: { driveId: Number(driveId) },
+      include: {
+        Results: {
+          select: {
+            topicScores: true,
+          },
+        },
+      },
+    });
+
+    let topicScores = dsScore
+      .map((data: any) => {
+        if (data?.Results) {
+          return data?.Results[0]?.topicScores[0];
+        }
+      })
+      .filter((score: any) => score !== undefined);
+
+    const highestScores = topicScores.reduce(
+      (acc: any, curr: any) => {
+        if (!acc.ds || curr.ds > acc.ds) {
+          acc.ds = curr.ds;
+        }
+        if (!acc.sql || curr.sql > acc.sql) {
+          acc.sql = curr.sql;
+        }
+        if (!acc.logical || curr.logical > acc.logical) {
+          acc.logical = curr.logical;
+        }
+        return acc;
+      },
+      { ds: 0, sql: 0, logical: 0 }
+    );
+
+    return { score: topScoreData?.score, ...highestScores };
+  } catch (error) {
+    console.log("Error in topRankScoreDao() ->", error);
+    throw error;
   }
 }

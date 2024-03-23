@@ -1,5 +1,5 @@
 import fastifyMulter from "fastify-multer";
-import path from "path";
+import * as path from "path";
 
 const uploadFolder = path.join(__dirname + "../../files");
 console.log(uploadFolder + " From multer Storage");

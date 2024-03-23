@@ -7,7 +7,7 @@ import {
   createCandidateTrack,
   updateCandidateTrack,
 } from "./auth.dao";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 
 const oauth2Client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
@@ -28,12 +28,14 @@ export async function verifyCandidate(
     const response = await checkCandidate(`${email}`);
     const studentId: number = response ? response?.studentId : 0;
     const candidateTrackData = await candidateTrack(studentId);
-    const attempts = candidateTrackData ? candidateTrackData?.loginAttempts : "create";
+    const attempts = candidateTrackData
+      ? candidateTrackData?.loginAttempts
+      : "create";
     if (attempts === true) {
       throw new Error("User logged in elsewhere");
     } else if (!attempts) {
       await updateCandidateTrack(studentId);
-    } else if(attempts==="create") {
+    } else if (attempts === "create") {
       await createCandidateTrack(studentId);
     }
     if (response) {
@@ -57,7 +59,7 @@ export async function verifyCandidate(
         message: "user does not exist in the database",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in verifyCandidate: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }

@@ -35,11 +35,11 @@ export async function campusYear(id: number) {
 }
 
 export async function storeAnswerDao(
-  questionId,
-  studentId,
-  userAnswer,
-  round,
-  timeStamp
+  questionId: number,
+  studentId: any,
+  userAnswer: string,
+  round: number,
+  timeStamp: string
 ) {
   // console.log("hi", userAnswer)
   try {
@@ -90,7 +90,7 @@ export async function storeAnswerDao(
   }
 }
 
-export async function loginAttempts(studentId) {
+export async function loginAttempts(studentId: any) {
   try {
     const drive = await prisma.drive.findFirst({
       where: {
@@ -121,7 +121,7 @@ export async function loginAttempts(studentId) {
   }
 }
 
-export async function checkSubmitted(studentId) {
+export async function checkSubmitted(studentId: any) {
   try {
     const drive = await prisma.drive.findFirst({
       where: {
@@ -154,7 +154,7 @@ export async function driveInstructions() {
       "Should not switch tabs",
     ];
 
-    const privileges = await prisma.drive.findFirst({
+    const privileges: any = await prisma.drive.findFirst({
       where: {
         driveStatus: "pending",
       },
@@ -188,7 +188,7 @@ export async function driveInstructions() {
   }
 }
 
-export async function lastAnsweredQuestion(studentId) {
+export async function lastAnsweredQuestion(studentId: any) {
   try {
     const drive = await prisma.drive.findFirst({
       where: {
@@ -240,7 +240,7 @@ export async function lastAnsweredQuestion(studentId) {
   }
 }
 
-export async function getMcq(questionId) {
+export async function getMcq(questionId: any) {
   try {
     let questionFormat = `question:${questionId}`;
     let questionString: any = await redis.get(questionFormat);
@@ -273,7 +273,7 @@ export async function getMcq(questionId) {
   }
 }
 
-export async function getcandidateQuestionSet(studentId) {
+export async function getcandidateQuestionSet(studentId: any) {
   try {
     const drive = await prisma.drive.findFirst({
       where: {
@@ -330,7 +330,7 @@ export async function getcandidateQuestionSet(studentId) {
             roundId: Number(round),
             questionId: {
               in: generateQuestionSet.map(
-                (questionSet) => questionSet.questionId
+                (questionSet: { questionId: any }) => questionSet.questionId
               ),
             },
           },
@@ -347,11 +347,13 @@ export async function getcandidateQuestionSet(studentId) {
         });
         console.log(answerMap);
         // Map answers to questionSet
-        const mappedQuestionSet = generateQuestionSet.map((questionSet) => ({
-          id: questionSet.id,
-          questionId: questionSet.questionId,
-          answer: answerMap.get(questionSet.questionId) || 0,
-        }));
+        const mappedQuestionSet = generateQuestionSet.map(
+          (questionSet: { id: any; questionId: number }) => ({
+            id: questionSet.id,
+            questionId: questionSet.questionId,
+            answer: answerMap.get(questionSet.questionId) || 0,
+          })
+        );
         return mappedQuestionSet;
       } else {
         // const id = driveId?.driveId;
@@ -397,7 +399,7 @@ export async function getcandidateQuestionSet(studentId) {
         });
         // console.log("answer", userAnswers);
         const answerMap = new Map();
-        userAnswers.forEach((answer) => {
+        userAnswers.forEach((answer: { questionId: any; answer: any }) => {
           answerMap.set(answer.questionId, answer.answer);
         });
         // console.log("userAnswers", userAnswers);
@@ -419,7 +421,7 @@ export async function getcandidateQuestionSet(studentId) {
   }
 }
 
-export async function storeCandidateTime(studentId) {
+export async function storeCandidateTime(studentId: any) {
   try {
     const timeTaken: any = await redis.get(`${studentId}`);
     console.log("timeTaken from redis :", timeTaken);
@@ -460,7 +462,12 @@ export async function storeCandidateTime(studentId) {
   }
 }
 
-export async function submitTestDao(submitted, studentId, round, driveId) {
+export async function submitTestDao(
+  submitted: boolean,
+  studentId: any,
+  round: Number,
+  driveId: Number
+) {
   try {
     const submitTest = await prisma.submitTest.upsert({
       where: {
@@ -499,7 +506,7 @@ export async function verifySlugDao(slug: string) {
   }
 }
 
-export async function createTabCount(tabCount, candidateId) {
+export async function createTabCount(tabCount: any, candidateId: any) {
   try {
     console.log(tabCount, "FIRED");
     const tabSwitch = await prisma.tabSwitch.findFirst({

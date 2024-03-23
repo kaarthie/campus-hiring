@@ -18,9 +18,9 @@ export async function generateQuestionSet(
         .code(200)
         .send({ status: false, message: "No questions set available" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in generateQuestionSet: ", error);
-    reply.code(500).send({status: false, message: error.message})
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 export async function getQuestionSet(
@@ -36,8 +36,8 @@ export async function getQuestionSet(
         .code(200)
         .send({ status: false, message: "No questions set available" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getQuestionSet: ", error);
-    reply.code(500).send({status: false, message: error.message})
+    reply.code(500).send({ status: false, message: error.message });
   }
 }

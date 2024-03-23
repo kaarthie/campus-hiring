@@ -20,9 +20,6 @@ import {
   verifySlug,
 } from "./candidate.controller";
 import { jwtVerification } from "../../preHandlers/preAuth";
-import { uploadCandidate } from "../../services/candidateGeneration";
-import upload from "../../services/multerStorage";
-import { preExcel } from "../../preHandlers/excel";
 
 const candidateRoutes: IRouteOptions<{
   Params: any;
@@ -60,12 +57,6 @@ const candidateRoutes: IRouteOptions<{
     url: "/getMcq",
     preHandler: [jwtVerification],
     handler: getQuestion,
-    method: API_METHODS.POST,
-  },
-  {
-    url: "/uploadCandidateDatabase",
-    preHandler: [preExcel],
-    handler: uploadCandidate,
     method: API_METHODS.POST,
   },
   {

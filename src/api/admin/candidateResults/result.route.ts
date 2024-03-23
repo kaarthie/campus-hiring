@@ -8,6 +8,7 @@ import {
   driveResult,
   filteredResult,
   filteredDownload,
+  topRankScore,
 } from "./result.controller";
 
 const resultRoutes: IRouteOptions<{
@@ -48,6 +49,12 @@ const resultRoutes: IRouteOptions<{
   {
     url: "/filteredResult/:driveId/:id",
     handler: filteredResult,
+    preHandler: [jwtAdminVerification],
+    method: API_METHODS.GET,
+  },
+  {
+    url: "/topRankScore/:driveId",
+    handler: topRankScore,
     preHandler: [jwtAdminVerification],
     method: API_METHODS.GET,
   },

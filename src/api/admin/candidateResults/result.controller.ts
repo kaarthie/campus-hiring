@@ -6,6 +6,7 @@ import {
   driveResults,
   resultsWithScores,
   filteredDownloadDao,
+  topRankScoreDao,
 } from "./result.dao";
 import { generateExcel, generateExcel2 } from "../../../utils/utils";
 interface driveId {
@@ -39,7 +40,7 @@ export async function resultDeletion(
         .code(404)
         .send({ status: false, message: "couldn't Delete results" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in resultDeletion: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -58,7 +59,7 @@ export async function completedandPendingDrives(
         .code(404)
         .send({ status: false, message: "couldn't get completed drives" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getDrives: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -71,7 +72,7 @@ export async function driveResult(
   try {
     const driveId = Number(request.params.id);
     const queryData: any = request.query;
-    const report = await driveResults({
+    const report: any = await driveResults({
       driveId: driveId,
       score: queryData?.score,
       dsOverall: queryData["DS Overall"],
@@ -102,7 +103,7 @@ export async function driveResult(
         message: "couldn't get completed drives and results",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in driveResult: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -142,14 +143,14 @@ export async function filteredDownload(
         message: "couldn't get completed drives and results",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in driveResult: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }
 
 export async function filteredResult(
-  request: FastifyRequest<{ Params: { driveId; id } }>,
+  request: FastifyRequest<{ Params: { driveId: any; id: any } }>,
   reply: FastifyReply
 ) {
   try {
@@ -157,8 +158,22 @@ export async function filteredResult(
     const rankId = Number(request.params.id);
     const Results = await resultsWithScores(driveId, rankId);
     reply.status(200).send(Results);
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in filteredResult: ", error);
+    reply.code(500).send({ message: error.message });
+  }
+}
+
+export async function topRankScore(
+  request: FastifyRequest<{ Params: { driveId: number } }>,
+  reply: FastifyReply
+) {
+  try {
+    const driveId = request.params.driveId;
+    const response = await topRankScoreDao(driveId);
+    reply.status(200).send({ status: true, data: response });
+  } catch (error: any) {
+    console.log("Error in topRankScore: ", error);
     reply.code(500).send({ message: error.message });
   }
 }

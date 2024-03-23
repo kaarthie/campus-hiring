@@ -27,7 +27,7 @@ export async function getRecruitmentTeamMembers(
         .code(403)
         .send({ status: false, message: "error in getting the team members" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getRecruitmentTeamMembers: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -38,16 +38,16 @@ export async function addTeamMember(
   reply: FastifyReply
 ) {
   try {
-    let { name, email, position,addedBy } = request.body as {
+    let { name, email, position, addedBy } = request.body as {
       name: string;
       email: string;
       position: String;
-      addedBy:string
+      addedBy: string;
     };
     const pattern = /@codingmart\.com$/;
 
     if (pattern.test(`${email}`)) {
-      const response = await addMember(name, email, position,addedBy);
+      const response: any = await addMember(name, email, position, addedBy);
       if (response.success) {
         reply.code(200).send({ status: true, message: "Team Member added" });
       } else if (
@@ -68,7 +68,7 @@ export async function addTeamMember(
         message: "user email Doesn't belong to codingmart domain",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in addTeamMember: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -114,7 +114,7 @@ export async function updateMember(
         message: "user email Doesn't belong to codingmart domain",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in updateMember: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -134,7 +134,7 @@ export async function removeTeamMember(
         .code(403)
         .send({ status: false, message: "Error in deleting a Team Member" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in removeTeamMember: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -148,7 +148,7 @@ export async function checkSuperAdmin(
     const email: string = (request.body as any).email;
     const response = await checkSuperAdminDao(email);
     reply.code(200).send({ status: true, superAdmin: response });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in checkSuperAdmin() ->", error);
     reply.code(500).send({ status: false, message: error.message });
   }

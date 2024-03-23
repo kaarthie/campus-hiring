@@ -30,6 +30,7 @@ import { resultDao } from "../candidateResults/result.dao";
 import { uploadCandidate } from "../../../services/candidateGeneration";
 import { collectStream, transformDriveResponse } from "../../../utils/utils";
 import { createSlugDao } from "../slug/slug.dao";
+import path = require("path");
 
 export async function getDetails(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -42,7 +43,7 @@ export async function getDetails(request: FastifyRequest, reply: FastifyReply) {
         message: "error in fetching the drive details",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getDetails: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -62,7 +63,7 @@ export async function getUpcomingDrive(
         message: "error in fetching the drive details",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getUpcomingDrive: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -97,7 +98,7 @@ export async function addFeedback(
         message: "error in adding the feedback details",
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in addFeedback: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -117,7 +118,7 @@ export async function removeFeedBack(
         .code(403)
         .send({ status: false, message: "Error in deleting a Feedback" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in removeFeedback: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -125,12 +126,18 @@ export async function removeFeedBack(
 
 export async function addDrive(request: any, reply: FastifyReply) {
   try {
-    const data = {};
+    const data: any = {};
     let excelExists = false;
     let fileData;
     // Iterate over each field in the form-data
     for await (const part of request.parts()) {
       if (part.file) {
+        const ext = path.extname(part.filename);
+        if (ext.toLowerCase() !== ".xlsx") {
+          throw new Error(
+            "Invalid file format. Only xlsx files are supported."
+          );
+        }
         excelExists = true;
         fileData = await collectStream(part.file);
       } else {
@@ -177,20 +184,6 @@ export async function addDrive(request: any, reply: FastifyReply) {
     let team: number | number[] = recruitmentTeam.split(",").map(Number);
     let job: string | string[] = jobRoles.split(",");
 
-    // console.log(
-    //   "From Create Drive Route",
-    //   hiringYear,
-    //   ConvertedDriveDate,
-    //   driveName,
-    //   team,
-    //   job,
-    //   duration,
-    //   roundName,
-    //   skip,
-    //   totalQuestions,
-    //   questionData
-    // );
-
     const response = await createNewDrive(
       hiringYear[0],
       ConvertedDriveDate,
@@ -214,7 +207,7 @@ export async function addDrive(request: any, reply: FastifyReply) {
       await createSlugDao(driveId);
     }
     reply.code(200).send({ status: true, message: "Drive Created" });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in addDrive: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -234,7 +227,7 @@ export async function deleteDrive(
         .code(403)
         .send({ status: false, message: "Error in deleting a Drive" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getDrives: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -253,7 +246,7 @@ export async function getCampusYears(
         .code(403)
         .send({ status: false, message: "Error in getting a campus Years" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getCampusYears: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -282,7 +275,7 @@ export async function startDrive(request: FastifyRequest, reply: FastifyReply) {
         .code(403)
         .send({ status: false, message: "Error in adding a campus drive" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in startDrive: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -310,7 +303,7 @@ export async function stopDrive(request: FastifyRequest, reply: FastifyReply) {
         .code(403)
         .send({ status: false, message: "Error in deleting a campus drive" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in stopDrive: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -376,7 +369,7 @@ export async function updateDriveHandler(request: any, reply: FastifyReply) {
     reply
       .code(200)
       .send({ status: true, message: "Drive Updated", data: response });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in updateDriveHandler: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -396,7 +389,7 @@ export async function getDriveByIdHandler(request: any, reply: FastifyReply) {
         resultFormat: response?.transformedResults,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getDriveByIdHandler: ", error);
     reply.code(500).send({ status: false, message: error.message });
   }
@@ -410,14 +403,14 @@ export async function getCollegeName(
     const driveName: string = (request.body as any).driveName;
     let response: any = await getCollegeNameDao(driveName);
 
-    response = response?.map((data) => {
+    response = response?.map((data: { college: any }) => {
       return data?.college;
     });
 
     reply
       .code(200)
       .send({ status: true, message: "Here are the results", data: response });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getCollegeName() ->", error);
     reply.code(500).send({ status: false, message: error.message });
   }

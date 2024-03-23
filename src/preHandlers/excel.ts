@@ -1,7 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import fs from "fs";
-import path from "path";
-import pump from "pump";
+import * as fs from "fs";
+import * as path from "path";
+import * as pump from 'pump';
+
 export async function preExcel(
   request: FastifyRequest,
   reply: FastifyReply,

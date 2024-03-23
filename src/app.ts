@@ -1,9 +1,8 @@
 import Fastify from "fastify";
-import path from "path";
+import * as path from "path";
 import Autoload from "@fastify/autoload";
-import fastifyMulter from "fastify-multer";
 import cors from "@fastify/cors";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import { jwtVerification } from "./preHandlers/preAuth";
 import { jwtAdminVerification } from "./preHandlers/preAdminAuth";
 import redisClient from "./config/redis";

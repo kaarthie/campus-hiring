@@ -1,7 +1,7 @@
 import redis from "../../../config/redis";
 import prisma from "../../../utils/prisma";
 
-export async function addPrivilege(IsSkipped, roundId) {
+export async function addPrivilege(IsSkipped: any, roundId: number) {
   try {
     const drive = await prisma.drive.findFirst({
       where: {
@@ -74,7 +74,7 @@ export async function getPrivilegeDao() {
   }
 }
 
-export async function trackCandidateDao(startTime, studentId) {
+export async function trackCandidateDao(studentId: any) {
   try {
     console.log("ENTERED");
     let timeData;
@@ -119,7 +119,7 @@ export async function addRound(body: any) {
     roundTopics,
   } = body;
   try {
-    const result = await prisma.$transaction(async (prisma) => {
+    const result = await prisma.$transaction(async (prisma: any) => {
       const driveId = await prisma.drive.findFirst({
         where: {
           driveStatus: "pending",

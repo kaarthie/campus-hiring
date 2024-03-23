@@ -1,5 +1,5 @@
-import cron from "node-cron";
-import nodemailer from "nodemailer";
+import * as cron from "node-cron";
+import * as nodemailer from "nodemailer";
 import prisma from "./prisma";
 
 const transporter = nodemailer.createTransport({
@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const areDatesSame = (date1, date2) => {
+const areDatesSame = (date1: Date, date2: Date) => {
   return (
     date1.getFullYear() === date2.getFullYear() &&
     date1.getMonth() === date2.getMonth() &&
@@ -18,7 +18,11 @@ const areDatesSame = (date1, date2) => {
   );
 };
 
-const sendReminderEmail = async (email, driveDate, daysBefore) => {
+const sendReminderEmail = async (
+  email: any,
+  driveDate: any,
+  daysBefore: number
+) => {
   const currentDate = new Date();
   const formattedDate = new Date(driveDate);
   formattedDate.setDate(formattedDate.getDate() - daysBefore);
@@ -54,13 +58,13 @@ export const scheduleEmails = () => {
 
     console.log(teamMembers);
 
-    teamMembers.forEach(({ RecruitmentTeam, driveDate }) => {
+    teamMembers.forEach(({ RecruitmentTeam, driveDate }: any) => {
       if (RecruitmentTeam && driveDate) {
         const teamMemberNames = RecruitmentTeam.flatMap(
-          (teamData) => teamData.teamMembers
+          (teamData: { teamMembers: any }) => teamData.teamMembers
         );
 
-        teamMemberNames.forEach(async (teamMemberName) => {
+        teamMemberNames.forEach(async (teamMemberName: any) => {
           const { email }: any = await prisma.recruitmentTeamMembers.findFirst({
             where: {
               name: teamMemberName,
@@ -89,13 +93,14 @@ export const scheduleEmails = () => {
       },
     });
 
-    teamMembers.forEach(({ RecruitmentTeam, driveDate }) => {
+    teamMembers.forEach(({ RecruitmentTeam, driveDate }: any) => {
       if (RecruitmentTeam && driveDate) {
-        const teamMemberNames = RecruitmentTeam.flatMap((teamData) =>
-          teamData.teamMembers.split(",").map((name) => name.trim())
+        const teamMemberNames = RecruitmentTeam.flatMap(
+          (teamData: { teamMembers: string }) =>
+            teamData.teamMembers.split(",").map((name) => name.trim())
         );
 
-        teamMemberNames.forEach(async (teamMemberName) => {
+        teamMemberNames.forEach(async (teamMemberName: any) => {
           const { email }: any = await prisma.recruitmentTeamMembers.findFirst({
             where: {
               name: teamMemberName,

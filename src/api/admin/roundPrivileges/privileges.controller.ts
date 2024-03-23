@@ -17,7 +17,7 @@ export async function addPrivileges(
     const { IsSkipped } = request.body as privileges;
     console.log(roundId);
     const response = await addPrivilege(IsSkipped, roundId);
-  
+
     if (response) {
       reply.code(200).send({ status: true, message: "privileges added" });
     } else {
@@ -25,9 +25,9 @@ export async function addPrivileges(
         .code(403)
         .send({ status: false, message: "error in adding the privileges" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in addPrivileges: ", error);
-    reply.code(500).send({ status: false, message: error.message })
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -44,9 +44,9 @@ export async function getprivileges(
         .code(403)
         .send({ status: false, message: "error in getting the privileges" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getPrivileges: ", error);
-    reply.code(500).send({ status: false, message: error.message })
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -62,9 +62,9 @@ export async function addRoundDetails(
     } else {
       reply.code(403).send({ status: false, message: "rounds not added" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in addRoundDetails: ", error);
-    reply.code(500).send({ status: false, message: error.message })
+    reply.code(500).send({ status: false, message: error.message });
   }
 }
 
@@ -81,8 +81,8 @@ export async function getRoundDetails(
         .code(403)
         .send({ status: false, message: "couldn't fetch round details" });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in getRoundDetails: ", error);
-    reply.code(500).send({ status: false, message: error.message })
+    reply.code(500).send({ status: false, message: error.message });
   }
 }

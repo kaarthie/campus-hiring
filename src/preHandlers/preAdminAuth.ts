@@ -1,10 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { verify } from 'jsonwebtoken';
+import  { verify } from 'jsonwebtoken';
 
 export const jwtAdminVerification = async (
     request: FastifyRequest,
     reply: FastifyReply,
-    done: (err?: Error) => void
 ) => {
     try {
         const token = request.headers.authorization?.replace('Bearer ', '');

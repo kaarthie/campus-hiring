@@ -10,7 +10,12 @@ export async function getMembers() {
   }
 }
 
-export async function addMember(name, email, position, addedBy) {
+export async function addMember(
+  name: string,
+  email: string,
+  position: any,
+  addedBy: string
+) {
   try {
     const existingMember = await prisma.recruitmentTeamMembers.findFirst({
       where: {
@@ -50,7 +55,7 @@ export async function addMember(name, email, position, addedBy) {
   }
 }
 
-export async function deleteMember(id) {
+export async function deleteMember(id: number) {
   try {
     const result = await prisma.recruitmentTeamMembers.delete({
       where: {
@@ -63,7 +68,12 @@ export async function deleteMember(id) {
   }
 }
 
-export async function updateTeamMember(id, name, email, position) {
+export async function updateTeamMember(
+  id: number,
+  name: string,
+  email: string,
+  position: any
+) {
   try {
     const existingMember = await prisma.recruitmentTeamMembers.findFirst({
       where: {

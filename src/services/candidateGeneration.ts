@@ -1,9 +1,7 @@
 import * as xlsx from "xlsx";
-import path from "path";
 import prisma from "../utils/prisma";
 
-export const uploadCandidate = async (fileStream,id) => {
-  console.log("check up ---->",id)
+export const uploadCandidate = async (fileStream: any, id: number) => {
   try {
     let data: Record<string, string>[] = [];
     // console.log("Creating Candidates");
@@ -42,11 +40,6 @@ export const uploadCandidate = async (fileStream,id) => {
           obj[h] = String(res[h]);
         });
         data.push(obj);
-        // const driveId = await prisma.drive.findFirst({
-        //   where: {
-        //     driveStatus: "upcoming",
-        //   },
-        // });
 
         const driveId = id;
         if (driveId) {
@@ -74,30 +67,7 @@ export const uploadCandidate = async (fileStream,id) => {
             email,
             address,
           } = obj;
-          // console.log(
-          //   registerNumber,
-          //   name,
-          //   college,
-          //   degree,
-          //   branch,
-          //   dateOfBirth,
-          //   gender,
-          //   tenthPercentage,
-          //   tenthYOP,
-          //   twelthPercentage,
-          //   twelthYOP,
-          //   diplomaPercentage,
-          //   diplomaYOP,
-          //   UG_CGPA,
-          //   UG_YOP,
-          //   PG_CGPA,
-          //   PG_YOP,
-          //   arrearStatus,
-          //   arrearCount,
-          //   mobileNumber,
-          //   email,
-          //   address
-          // );
+          
           const response = await prisma.candidateDetailsCollege.create({
             data: {
               driveId: +driveId,

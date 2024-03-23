@@ -1,8 +1,4 @@
-import { includes, map } from "lodash";
 import prisma from "../../../utils/prisma";
-import fastifyMulter from "fastify-multer";
-import { Prisma } from "@prisma/client";
-// import { storage } from "../../../services/multerStorage";
 
 export async function getDriveDetails() {
   try {
@@ -26,7 +22,7 @@ export async function getDriveDetails() {
       },
     });
     const filteredCampuses = res.filter(
-      (campus) => Object.keys(campus.drive).length > 0
+      (campus: any) => Object.keys(campus.drive).length > 0
     );
     console.log(filteredCampuses);
     return filteredCampuses;
@@ -42,6 +38,7 @@ export async function getDriveDetails() {
     // return response;
   } catch (error) {
     console.log("Error in getDriveDetails:", error);
+    throw error;
   }
 }
 
@@ -60,22 +57,23 @@ export async function getDrive() {
       },
     });
     console.log("Drive data --> ", driveData);
-    const driveIds = driveData.map((data) => {
+    const driveIds = driveData.map((data: { college: { driveName: any } }) => {
       return data.college?.driveName;
     });
     return driveIds;
   } catch (error) {
     console.log("Error in getDrive() ->", error);
+    throw error;
   }
 }
 
 export async function drivefeedback(
-  labFacilitiesRating,
-  hospitalityRating,
-  internetBandwidthRating,
-  studentAbilityRating,
-  feedback,
-  id
+  labFacilitiesRating: any,
+  hospitalityRating: any,
+  internetBandwidthRating: any,
+  studentAbilityRating: any,
+  feedback: any,
+  id: any
 ) {
   try {
     const res = await prisma.feedBack.create({
@@ -91,10 +89,11 @@ export async function drivefeedback(
     return res;
   } catch (error) {
     console.log("Error in drivefeedback:", error);
+    throw error;
   }
 }
 
-export async function deleteFeedback(id) {
+export async function deleteFeedback(id: number) {
   try {
     const result = await prisma.feedBack.delete({
       where: {
@@ -104,20 +103,21 @@ export async function deleteFeedback(id) {
     return true;
   } catch (error) {
     console.log("Error in deletefeedback:", error);
+    throw error;
   }
 }
 
 export async function createNewDrive(
-  campusId,
-  ConvertedDriveDate,
-  driveName,
-  recruitmentTeam,
-  job,
-  duration,
-  roundName,
-  skip,
-  totalQuestions,
-  questionData
+  campusId: any,
+  ConvertedDriveDate: Date,
+  driveName: any,
+  recruitmentTeam: any,
+  job: any,
+  duration: any,
+  roundName: any,
+  skip: any,
+  totalQuestions: any,
+  questionData: any
 ) {
   try {
     skip = skip === "No" ? false : true;
@@ -126,7 +126,7 @@ export async function createNewDrive(
         data: {
           campusId: Number(campusId),
           driveDate: ConvertedDriveDate,
-          driveStatus: "upcoming", //
+          driveStatus: "upcoming",
           college: {
             create: {
               driveName: driveName,
@@ -142,7 +142,7 @@ export async function createNewDrive(
           //   ),
           // },
           jobRoles: {
-            create: job.map((role) => ({
+            create: job.map((role: any) => ({
               jobRole: role,
             })),
           },
@@ -185,10 +185,11 @@ export async function createNewDrive(
     return { result };
   } catch (error) {
     console.log("Error in createNewDrive:", error);
+    throw error;
   }
 }
 
-export async function deleteDriveDao(driveId) {
+export async function deleteDriveDao(driveId: number) {
   try {
     const drive = await prisma.drive.findUnique({
       where: {
@@ -265,6 +266,7 @@ export async function deleteDriveDao(driveId) {
     return true;
   } catch (error) {
     console.log("Error in deleteDriveDao:", error);
+    throw error;
   }
 }
 
@@ -277,10 +279,11 @@ export async function campusYears() {
     return false;
   } catch (error) {
     console.log("Error in campusYears:", error);
+    throw error;
   }
 }
 
-export async function updateDriveStatus(driveId) {
+export async function updateDriveStatus(driveId: any) {
   try {
     const res = await prisma.drive.update({
       where: {
@@ -293,10 +296,15 @@ export async function updateDriveStatus(driveId) {
     return true;
   } catch (error) {
     console.log("Error in updateDriveStatus:", error);
+    throw error;
   }
 }
 
-export async function updateRoundStatus(driveId, roundId, status) {
+export async function updateRoundStatus(
+  driveId: Number,
+  roundId: number,
+  status: string
+) {
   try {
     const res = await prisma.rounds.update({
       where: {
@@ -312,10 +320,14 @@ export async function updateRoundStatus(driveId, roundId, status) {
     return true;
   } catch (error) {
     console.log("Error in updateRoundStatus:", error);
+    throw error;
   }
 }
 
-export async function updateDriveStatusCompleted(driveId, roundId) {
+export async function updateDriveStatusCompleted(
+  driveId: Number,
+  roundId: number
+) {
   try {
     const round = await prisma.rounds.findFirst({
       where: {
@@ -342,10 +354,11 @@ export async function updateDriveStatusCompleted(driveId, roundId) {
     return true;
   } catch (error) {
     console.log("Error in updateDriveStatusCompleted:", error);
+    throw error;
   }
 }
 
-export async function getDriveById(driveId) {
+export async function getDriveById(driveId: number) {
   try {
     const drive = await prisma.drive.findUnique({
       where: {
@@ -368,7 +381,7 @@ export async function getDriveById(driveId) {
       ? JSON.parse(drive?.Rounds[0]?.roundTestConfig)
       : null;
 
-    let transformedResults;
+    let transformedResults: any;
     if (resultsFormat) {
       transformedResults = {};
       Object.keys(resultsFormat).forEach((topic) => {
@@ -389,21 +402,25 @@ export async function getDriveById(driveId) {
     return { drive, transformedResults };
   } catch (error) {
     console.log("Error in getDriveById:", error);
+    throw error;
   }
 }
 
 export async function updateDrive(
-  driveId,
-  campusId,
-  ConvertedDriveDate,
-  driveName,
-  recruitmentTeam,
-  job,
-  duration,
-  roundName,
-  skip,
-  totalQuestions,
-  questionData
+  driveId: number,
+  campusId: any,
+  ConvertedDriveDate: string | number | Date,
+  driveName: any,
+  recruitmentTeam: any,
+  job: {
+    split: (arg0: string) => any;
+    map: (arg0: (role: any) => { jobRole: any }) => any;
+  },
+  duration: any,
+  roundName: any,
+  skip: string | boolean,
+  totalQuestions: any,
+  questionData: any
 ) {
   try {
     // Update the drive
@@ -424,7 +441,7 @@ export async function updateDrive(
         },
         jobRoles: {
           deleteMany: {},
-          create: job.map((role) => ({
+          create: job.map((role: any) => ({
             jobRole: role,
           })),
         },
@@ -470,23 +487,27 @@ export async function updateDrive(
     return updatedDrive;
   } catch (error) {
     console.log("Error in updateDrive:", error);
+    throw error;
   }
 }
 
 export async function getCollegeNameDao(driveName: string) {
   try {
-    const driveData = await prisma.college.findFirst({
-      where: { driveName: driveName },
-    });
-
-    const collegeNames = await prisma.candidateDetailsCollege.groupBy({
-      by: ["college"],
-      where: {
-        driveId: driveData?.driveId,
-      },
-    });
+    let collegeNames: any = [];
+    if (driveName) {
+      const driveData = await prisma.college.findFirst({
+        where: { driveName: driveName },
+      });
+      collegeNames = await prisma.candidateDetailsCollege.groupBy({
+        by: ["college"],
+        where: {
+          driveId: driveData?.driveId,
+        },
+      });
+    }
     return collegeNames;
   } catch (error) {
     console.log("Error in getCollegeNameDao() ->", error);
+    throw error;
   }
 }

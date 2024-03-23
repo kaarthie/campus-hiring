@@ -14,6 +14,7 @@ export async function checkAdmin(email: string) {
     }
   } catch (error) {
     console.log("Error in checkAdmin:", error);
+    throw error;
   }
 }
 

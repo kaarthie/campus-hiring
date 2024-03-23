@@ -1,7 +1,6 @@
-import XlsxPopulate from "xlsx-populate";
-import path from "path";
+import * as XlsxPopulate from "xlsx-populate";
+import * as path from "path";
 import { cloudinary } from "../config/cloudinary";
-import { getCandidateDetailsForExcel } from "../api/admin/candidate/candidate.dao";
 interface Question {
   questionId: number;
   round: number;
@@ -11,18 +10,21 @@ interface NumberedQuestion {
   [key: number]: Question;
 }
 
-export async function shuffle(questionSet) {
+export async function shuffle(questionSet: any) {
   // let questionSet = array.questionSet
   await questionSet.sort(() => Math.random() - 0.5);
   // return array
-  const numberedObject = questionSet.reduce((obj, value, index) => {
-    obj[index + 1] = value;
-    return obj;
-  }, {});
+  const numberedObject = questionSet.reduce(
+    (obj: any, value: any, index: number) => {
+      obj[index + 1] = value;
+      return obj;
+    },
+    {}
+  );
   return numberedObject;
 }
 
-export async function generateExcel(Result, driveId) {
+export async function generateExcel(Result: any, driveId: any) {
   try {
     const workbook = await XlsxPopulate.fromBlankAsync();
     const sheet = workbook.sheet("Sheet1");
@@ -50,8 +52,8 @@ export async function generateExcel(Result, driveId) {
 
     // Populate the sheet with data
     let currentRow = 2;
-    Result.forEach((entry) => {
-      entry.candidates.forEach((candidate) => {
+    Result.forEach((entry: any) => {
+      entry.candidates.forEach((candidate: any) => {
         sheet.cell(currentRow, 1).value(entry.score);
         sheet.cell(currentRow, 2).value(entry.student_count);
         sheet.cell(currentRow, 3).value(candidate.candidateId);
@@ -90,7 +92,7 @@ export async function generateExcel(Result, driveId) {
   }
 }
 
-export async function generateExcel2(Result, driveId) {
+export async function generateExcel2(Result: any, driveId: any) {
   try {
     const workbook = await XlsxPopulate.fromBlankAsync();
     const sheet = workbook.sheet("Sheet1");
@@ -118,7 +120,7 @@ export async function generateExcel2(Result, driveId) {
 
     // Populate the sheet with data
     let currentRow = 2;
-    Result.forEach((entry) => {
+    Result.forEach((entry: any) => {
       sheet.cell(currentRow, 1).value(entry.registerNumber);
       sheet.cell(currentRow, 2).value(entry.name);
       sheet.cell(currentRow, 3).value(entry.email);
@@ -180,7 +182,14 @@ export function shuffleQuestionOptions(question: any): any {
   return shuffledOptions;
 }
 
-export async function collectStream(stream) {
+export function shuffleArray(array: any) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+export async function collectStream(stream: any) {
   try {
     let data = Buffer.alloc(0);
     for await (const chunk of stream) {
@@ -193,7 +202,7 @@ export async function collectStream(stream) {
   }
 }
 
-export function transformDriveResponse(responseBody) {
+export function transformDriveResponse(responseBody: any) {
   const {
     campusId,
     college: { driveName },
@@ -208,7 +217,7 @@ export function transformDriveResponse(responseBody) {
     hiringYear: campusId, // Using campusId as hiringYear
     driveName,
     driveDate: new Date(driveDate).toISOString().split("T")[0], // Formatting driveDate to 'YYYY-MM-DD'
-    jobRoles: jobRoles.map((role) => role.jobRole), // Concatenating job roles
+    jobRoles: jobRoles.map((role: any) => role.jobRole), // Concatenating job roles
     roundName: Rounds[0].roundName, // Assuming there's only one round
     duration: Rounds[0].roundDuration,
     totalQuestions: Rounds[0].roundTotalQuestions,
