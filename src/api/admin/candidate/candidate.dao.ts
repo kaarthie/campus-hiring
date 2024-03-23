@@ -116,7 +116,7 @@ export async function getCandidateDetailsForExcel(studentId: any) {
 export async function candidateStatusDao(
   driveId: number,
   page: number = 0,
-  pageSize: number = 10,
+  pageSize: number = 5,
   registerNumber: string
 ) {
   try {
