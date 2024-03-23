@@ -4,7 +4,10 @@ import {
   createCandidate,
   unlockCandidateDao,
 } from "./candidate.dao";
-import { ICandidateDetailsCollege } from "./candidate.interface";
+import {
+  ICandidateDetailsCollege,
+  IcandidateStatus,
+} from "./candidate.interface";
 
 export async function addNewCandidate(
   request: FastifyRequest,
@@ -78,16 +81,23 @@ export async function addNewCandidate(
 }
 
 export async function candidateStatus(
-  request: FastifyRequest,
+  request: FastifyRequest<{ Querystring: IcandidateStatus }>,
   reply: FastifyReply
 ) {
   try {
     const { driveId }: any = request.params;
-    const response = await candidateStatusDao(+driveId);
+    const { page, pageSize, registerNumber } = request.query;
+    const response = await candidateStatusDao(
+      +driveId,
+      page,
+      pageSize,
+      registerNumber
+    );
     reply.code(200).send({
       status: true,
       message: "Here are the results",
-      data: response,
+      data: response?.candidatesData,
+      count: response?.count,
     });
   } catch (error: any) {
     console.log("Error in candidateStatus() ->", error);

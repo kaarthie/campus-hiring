@@ -113,10 +113,26 @@ export async function getCandidateDetailsForExcel(studentId: any) {
   }
 }
 
-export async function candidateStatusDao(driveId: number) {
+export async function candidateStatusDao(
+  driveId: number,
+  page: number = 0,
+  pageSize: number = 10,
+  registerNumber: string
+) {
   try {
+    let whereCondition: any = {};
+    whereCondition.driveId = driveId;
+    if (registerNumber) {
+      whereCondition.registerNumber = { startsWith: `${registerNumber}` };
+      page = 0;
+    }
+    const count = await prisma.candidateDetailsCollege.count({
+      where: whereCondition,
+    });
     const candidatesData = await prisma.candidateDetailsCollege.findMany({
-      where: { driveId },
+      take: +pageSize,
+      skip: +page,
+      where: whereCondition,
     });
 
     const candidatesWithStatus = await Promise.all(
@@ -158,7 +174,7 @@ export async function candidateStatusDao(driveId: number) {
       })
     );
 
-    return { candidatesData: candidatesWithStatus };
+    return { candidatesData: candidatesWithStatus, count: count };
   } catch (error) {
     console.log("Error in candidateStatusDao() ->", error);
   }

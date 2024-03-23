@@ -23,3 +23,9 @@ export interface ICandidateDetailsCollege {
   address?: string | null;
   driveName: string;
 }
+
+export interface IcandidateStatus {
+  page: number;
+  pageSize: number;
+  registerNumber?: string;
+}
