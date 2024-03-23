@@ -124,14 +124,14 @@ export async function candidateStatusDao(
     whereCondition.driveId = driveId;
     if (registerNumber) {
       whereCondition.registerNumber = { startsWith: `${registerNumber}` };
-      page = 0;
     }
     const count = await prisma.candidateDetailsCollege.count({
       where: whereCondition,
     });
+    const skip = page > 0 ? (page - 1) * pageSize : 0;
     const candidatesData = await prisma.candidateDetailsCollege.findMany({
       take: +pageSize,
-      skip: +page,
+      skip: skip,
       where: whereCondition,
     });
 
