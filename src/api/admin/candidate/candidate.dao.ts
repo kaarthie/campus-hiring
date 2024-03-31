@@ -190,13 +190,20 @@ export async function unlockCandidateDao(
       where: { studentId: candidateId },
       data: { loginAttempts: false },
     });
-    const answerData = await prisma.answers.findMany({
+    let answerData: any;
+    answerData = await prisma.answers.findMany({
       where: { candidateId: candidateId },
       orderBy: {
         createdAt: "desc",
       },
     });
-    if (answerData && !timeStamp) {
+    if (answerData.length == 0) {
+      const res = await prisma.rounds.findFirst({
+        where: { driveId: response?.driveId },
+      });
+      answerData.push({ timeStamp: `${res?.roundDuration}:00` });
+    }
+    if (answerData.length > 0 && !timeStamp) {
       const timeStamp = answerData[0]?.timeStamp;
       await redis.set(`${candidateId}`, `${timeStamp}`);
     } else {

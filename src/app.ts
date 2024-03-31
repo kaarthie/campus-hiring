@@ -17,11 +17,14 @@ const result = dotenv.config({ path: envPath });
 
 function server() {
   const fastify = Fastify();
+  const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+
   fastify.register(multipart);
   fastify.register(cors, {
-    origin: "*",
+    origin: allowedOrigins,
     credentials: true,
   });
+
   // fastify.register(fastifyXLSX);
 
   fastify.register(Autoload, {
