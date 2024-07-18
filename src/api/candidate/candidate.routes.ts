@@ -18,6 +18,7 @@ import {
   submitTest,
   addNewTabCount,
   verifySlug,
+  roundTwoSlug,
 } from "./candidate.controller";
 import { jwtVerification } from "../../preHandlers/preAuth";
 
@@ -81,6 +82,11 @@ const candidateRoutes: IRouteOptions<{
   {
     url: "/slug",
     handler: verifySlug,
+    method: API_METHODS.POST,
+  },
+  {
+    url: "/roundTwoSlug",
+    handler: roundTwoSlug,
     method: API_METHODS.POST,
   },
 ];

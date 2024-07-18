@@ -506,6 +506,26 @@ export async function verifySlugDao(slug: string) {
   }
 }
 
+export async function roundTwoSlugDao(slug: string) {
+  try {
+    const slugDetails = await prisma.pdfSlug.findUnique({
+      where: {
+        slug: slug,
+        isAccess: true,
+      },
+    });
+    if (slugDetails) {
+      const { questionUrl } = await prisma.questionPdf.findFirst({
+        where: { id: slugDetails.pdfQuestionId },
+      });
+      return questionUrl;
+    }
+    return false;
+  } catch (error) {
+    console.log("Error in roundTwoSlugDao() ->", error);
+  }
+}
+
 export async function createTabCount(tabCount: any, candidateId: any) {
   try {
     console.log(tabCount, "FIRED");

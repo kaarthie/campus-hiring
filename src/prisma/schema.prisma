@@ -36,8 +36,28 @@ model Drive {
   submitTest              submitTest[]
   jobRoles                jobRoles[]
   slugDetails             slugDetails[]
+  pdfSlug                 pdfSlug[]
 
   @@map("drive_details")
+}
+
+model questionPdf {
+  id           Int       @id @default(autoincrement())
+  questionName String
+  questionUrl  String
+  pdfSlug      pdfSlug[]
+}
+
+model pdfSlug {
+  id            Int         @id @default(autoincrement())
+  driveId       Int
+  pdfQuestionId Int
+  slug          String      @unique
+  isAccess      Boolean     @default(true)
+  drive         Drive       @relation(fields: [driveId], references: [driveId])
+  questionPdf   questionPdf @relation(fields: [pdfQuestionId], references: [id])
+
+  @@map("pdfSlug")
 }
 
 model slugDetails {
@@ -49,7 +69,7 @@ model slugDetails {
 
 model college {
   driveId   Int    @unique
-  driveName String @db.VarChar(70) @unique
+  driveName String @unique @db.VarChar(70)
   id        Int    @id @default(autoincrement())
   drive     Drive  @relation(fields: [driveId], references: [driveId])
 
@@ -221,6 +241,7 @@ model Rounds {
   results             Results[]
 
   @@id([driveId, round])
+  @@unique([round, driveId])
   @@index([round, driveId])
   @@map("round_details")
 }

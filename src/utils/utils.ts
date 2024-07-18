@@ -1,6 +1,7 @@
 import * as XlsxPopulate from "xlsx-populate";
 import * as path from "path";
 import { cloudinary } from "../config/cloudinary";
+import axios from "axios";
 interface Question {
   questionId: number;
   round: number;
@@ -180,6 +181,30 @@ export function shuffleQuestionOptions(question: any): any {
   }
 
   return shuffledOptions;
+}
+
+export function generatePdfSlugArray(data: any) {
+  const { driveId, slug, questionIds } = data;
+  const pdfSlugArray = [];
+
+  let i = 1;
+  for (const questionId of questionIds) {
+    const combinedSlug = `${slug}${i}`;
+    i++;
+    pdfSlugArray.push({
+      driveId: driveId,
+      pdfQuestionId: questionId,
+      slug: combinedSlug,
+      isAccess: true,
+    });
+  }
+
+  return pdfSlugArray;
+}
+
+export async function fetchAndConvertToBinary(pdfUrl: string): Promise<Buffer> {
+  const response = await axios.get(pdfUrl);
+  return response.data;
 }
 
 export function shuffleArray(array: any) {

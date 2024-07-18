@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsnd --transpile-only --respawn --exit-child src/server.ts",
     "build": "tsc",
-    "start": "npx prisma generate && node server.js"
+    "start": "npx prisma generate && pm2-runtime server.js"
   },
   "author": "",
   "license": "ISC",
@@ -25,6 +25,7 @@
     "@types/node": "^20.3.3",
     "@types/xlsx": "^0.0.36",
     "async-redis": "^2.0.0",
+    "axios": "^1.6.8",
     "cloudinary": "^1.40.0",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",

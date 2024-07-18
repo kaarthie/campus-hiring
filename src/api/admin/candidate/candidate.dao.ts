@@ -133,6 +133,15 @@ export async function candidateStatusDao(
       take: +pageSize,
       skip: skip,
       where: whereCondition,
+      select:{
+        studentId:true,
+        registerNumber:true,
+        name:true,
+        college:true,
+        degree:true,
+        branch:true,
+        email:true
+      }
     });
 
     const candidatesWithStatus = await Promise.all(

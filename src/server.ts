@@ -11,6 +11,7 @@ async function main() {
       port: Number(process.env.port),
       host: "0.0.0.0",
     });
+    console.log(`Server is running on port ${process.env.port}`);
   } catch (e) {
     console.error(e);
     process.exit(1);

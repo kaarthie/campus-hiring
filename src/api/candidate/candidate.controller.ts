@@ -13,6 +13,7 @@ import {
   createTabCount,
   verifySlugDao,
   createInitialTabSwitch,
+  roundTwoSlugDao,
 } from "./candidate.dao";
 import redis from "../../config/redis";
 import {
@@ -25,6 +26,7 @@ import {
   getRound,
   trackCandidateDao,
 } from "../admin/roundPrivileges/privileges.dao";
+import { fetchAndConvertToBinary } from "../../utils/utils";
 
 export async function getCampusDetails(
   request: FastifyRequest,
@@ -87,7 +89,6 @@ export async function candidateInstructions(request: any, reply: FastifyReply) {
     // console.log(instructions);
     const attempts: any = await loginAttempts(studentId);
     const submitted = await checkSubmitted(studentId);
-    console.log("Submitted", submitted);
     const loginAttemptsByCandidate = attempts.attempts;
     const round = Number(attempts.round);
     let driveObj: any = {};
@@ -141,8 +142,6 @@ export async function getQuestion(
   try {
     console.log("Question ID", request.body);
     const { questionid }: any = request.body as { id: number };
-    // const mcq = (await redis).get(`${questionId.questionId}`);
-    console.log("Question--------", questionid);
 
     const mcq = await getMcq(questionid);
     if (mcq) {
@@ -327,6 +326,26 @@ export async function verifySlug(request: FastifyRequest, reply: FastifyReply) {
     }
   } catch (error: any) {
     console.log("Error in verifySlug() ->", error);
+    reply.code(500).send({ status: false, message: error.message });
+  }
+}
+
+export async function roundTwoSlug(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const slug: string = (request.body as any).slug;
+    const response: any = await roundTwoSlugDao(slug);
+    if (response) {
+      reply.code(200).send({ status: true, data: response });
+    } else {
+      reply
+        .code(404)
+        .send({ status: false, message: "Slug is not verfied, No content" });
+    }
+  } catch (error: any) {
+    console.log("Error in roundTwoSlug() ->", error);
     reply.code(500).send({ status: false, message: error.message });
   }
 }

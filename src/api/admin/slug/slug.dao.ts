@@ -29,7 +29,7 @@ async function generateSlug(driveId: number) {
     },
   });
 
-  const college = candidateDetails?.college || "";
+  let college = (candidateDetails?.college || "").toLowerCase().replace(/[^a-zA-Z0-9]/g, "");
   if (!college || !campusDetail?.campus?.campusYear) {
     throw new Error("College name or campus year not found");
   }
